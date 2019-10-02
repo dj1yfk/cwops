@@ -1,0 +1,47 @@
+body,td{font-family:Ubuntu,calibri,tahoma,arial,sans-serif; font-size: 12px}
+h2 {font-size:18px}
+h3 {
+		margin-bottom: 1px;
+		padding-bottom: 1px;
+}
+h4 {
+		padding: 0px 0px 0px 5px;
+		margin: 0px 0px 0px 5px;
+}
+ul {
+	margin-top: 3px; 
+	margin-bottom: 3px; 
+}
+table {
+		border-width: 2px;
+		border-color: #000000;
+		border-style: solid;
+}
+th {
+		background-color: #aabbff;
+}
+td {
+		padding-right: 6px;
+		padding-left: 6px;
+}
+
+code {
+		background-color: #dddddd;
+}
+.newspot { background-color: #ffcccc; }
+.midspot { background-color: #ffffff; }
+.oldspot { background-color: #eeeeee; }
+.right { text-align:right; }
+
+.snr40 { color: #000000; }
+.snr30 { color: #444444; }
+.snr20 { color: #888888; }
+.snr10 { color: #aaaaaa; }
+.snr00 { color: #cccccc; }
+
+.snr40hc { font-weight: bold; color: #000000; }
+.snr30hc { color: #111111; }
+.snr20hc { color: #222222; }
+.snr10hc { color: #333333; }
+.snr00hc { color: #444444; }
+
