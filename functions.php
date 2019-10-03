@@ -456,8 +456,9 @@ function filter_qsos ($qsos, $callsign) {
 function new_aca($qso, $c) {
     global $db;
 
-    if (substr($qso['date'], 0, 4) != "2019")
+    if (substr($qso['date'], 0, 4) != date("Y")) {
         return false;
+    }
 
     $query = "SELECT count(*) from cwops_log where mycall='$c' and nr=".$qso['nr']." and year=YEAR(CURDATE())";
     $q = mysqli_query($db, $query);
