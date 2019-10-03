@@ -83,7 +83,7 @@ else {
 		if (!$_SERVER['HTTPS']) { ?> - <a rel="nofollow" href="https://cwops.telegraphy.de/">Switch to https</a> <? } 
 		else { ?> - <a rel="nofollow" href="http://cwops.telegraphy.de/">Switch to http</a> <? } 
 ?>
-- <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a>
+- <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Souce code repository</a>
 </p>
 
 </body>
