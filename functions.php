@@ -1,9 +1,166 @@
 <?php
 include_once("db.php");
 
+$states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
+
+
 function stats($c) {
     global $db;
+
+    # ACA
+
+    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE())");
+    $r = mysqli_fetch_row($q);
+    $aca = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c'");
+    $r = mysqli_fetch_row($q);
+    $cma = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where `mycall`='$c'");
+    $r = mysqli_fetch_row($q);
+    $was = $r[0]-1; # empty state
+
+    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `mycall`='$c'");
+    $r = mysqli_fetch_row($q);
+    $dxcc = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where `mycall`='$c'");
+    $r = mysqli_fetch_row($q);
+    $waz = $r[0];
+
+?>
+<table>
+<tr><th>Award</th><th>Score</th><th>Details</th></tr>
+<tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 0);?></td></tr>
+<tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 0);?></td></tr>
+<tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 1);?></td></tr>
+<tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 1);?></td></tr>
+<tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 1);?></td></tr>
+</table>
+
+<div id="details"></div>
+
+    <script>
+    function details(t) {
+        var band = document.getElementById('band'+t).value;
+        console.log('Details for ' + t + ' on ' + band);
+
+    }
+    </script>
+
+<?
 }
+
+function award_details($t, $b) {
+    $ret = "<button id='$t' onClick='javascript:details(this.id);'>Show details</button>";
+
+    if ($b) {
+        $ret .= "<select name=\"band\" id=\"band$t\" size=1>
+               <option>all</option>
+               <option>160</option>
+               <option>80</option>
+               <option>60</option>
+               <option>40</option>
+               <option>30</option>
+               <option>20</option>
+               <option>17</option>
+               <option>15</option>
+               <option>12</option>
+               <option>10</option>
+               <option>6</option>
+               <option>2</option></select>";
+    }
+    return $ret;
+}
+
+function aca($c) {
+    global $db;
+    $ret = "";
+    $q = mysqli_query($db, "SELECT `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) group by `nr`");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+    $cnt = 1;
+    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td></tr>\n";
+    }
+    $ret .= "</table>";
+    return $ret;
+}
+
+function was($c, $b) {
+    global $db;
+    global $states; 
+
+    if ($b != "all") {
+        $band = " and band=$b ";
+    }
+
+    $q = mysqli_query($db, "SELECT `was`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c'  and LENGTH(`was`) = 2 $band group by `was`");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+
+    $states_needed = $states;
+    
+    $cnt = 1;
+    $ret = "<table><tr><th>Count</th><th>State</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
+        unset($states_needed[$r[0]]);
+    }
+    $ret .= "</table>";
+    $ret .= "<p>Needed: ".implode(", ", array_keys($states_needed))."</p>";
+    return $ret;
+}
+
+function waz($c, $b) {
+    global $db;
+    $ret = "";
+
+    if ($b != "all") {
+        $band = " and band=$b ";
+    }
+
+    $q = mysqli_query($db, "SELECT `waz`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and waz > 0 $band group by `waz`");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+
+    $cnt = 1;
+    $ret .= "<table><tr><th>Count</th><th>Zone</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
+    }
+    $ret .= "</table>";
+    return $ret;
+}
+
+function dxcc($c, $b) {
+    global $db;
+    include("dxccs.php");
+    $ret = "";
+
+    if ($b != "all") {
+        $band = " and band=$b ";
+    }
+
+    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc > 0 $band group by `dxcc`");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+
+    $cnt = 1;
+    $ret .= "<table><tr><th>Count</th><th>DXCC</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$dxcc[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
+    }
+    $ret .= "</table>";
+    return $ret;
+}
+
 
 
 # import an ADIF file to the log of $callsign
@@ -56,6 +213,9 @@ function parse_adif($adif, $members) {
     # make hash table for quicker member lookup
     $mh = array();
     foreach ($members as $m) {
+        # fix date
+        $m['joined'] = preg_replace('/-/','',  $m['joined']);
+        $m['left']   = preg_replace('/-/','',  $m['left']);
         $mh[$m["callsign"]] = $m;
     }
 
@@ -240,8 +400,11 @@ function filter_qsos ($qsos, $callsign) {
 # ACA: New QSO with this member this year?
 function new_aca($qso, $c) {
     global $db;
+
+    if (substr($qso['date'], 0, 4) != "2019")
+        return false;
+
     $query = "SELECT count(*) from cwops_log where mycall='$c' and nr=".$qso['nr']." and year=YEAR(CURDATE())";
-    error_log($query);
     $q = mysqli_query($db, $query);
     $r = mysqli_fetch_row($q);
     return ($r[0] == 0); 
@@ -320,14 +483,10 @@ function get_log ($call) {
     return $out;
 }
 
+#import(file_get_contents("dj1yfk.adi"), "DJ1YFK");
 
-
-
-
-import(file_get_contents("dj1yfk.adi"), "y");
-
-$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-echo "time: $time\n";
+#$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+#echo "time: $time\n";
 
 
 ?>
