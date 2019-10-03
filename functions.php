@@ -224,7 +224,9 @@ function import($adif, $callsign) {
     $qsos = filter_qsos($qsos, $callsign);
     $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
 
-    $ret .= "<pre>";
+    $ret .= "Full log of the import below. <a href='#' onClick='javascript:document.getElementById(\"import_log\").style.display = \"none\";'>Click here to hide</a>";
+
+    $ret .= "<pre id='import_log'>";
     foreach ($qsos as $q) {
         $ret .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
     }
@@ -272,9 +274,14 @@ function parse_adif($adif, $members) {
             if (!preg_match('/<MODE:2(:\w)?()>CW/', $q)) {
                 continue;
             }
-
+            
             # strip call (portable stuff etc.)
-            $call = $qsocall;      # TODO
+            if (preg_match('/^(\w{1,3}\/)?(\w{3,99})(\/\w{1,3})?$/', $qsocall, $match)) {
+                $call = $match[2];
+            }
+            else {
+                $call = $qsocall;
+            }
 
             # Check if there's a "CWO:" specified somewhere, e.g. in the
             # comment field
