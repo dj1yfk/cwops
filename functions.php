@@ -19,7 +19,10 @@ function stats($c) {
 
     $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where `mycall`='$c'");
     $r = mysqli_fetch_row($q);
-    $was = $r[0]-1; # empty state
+    $was = $r[0]; # empty state
+    if ($was == -1) {
+        $was = 0;
+    }
 
     $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `mycall`='$c'");
     $r = mysqli_fetch_row($q);
@@ -42,9 +45,27 @@ function stats($c) {
 <div id="details"></div>
 
     <script>
-    function details(t) {
-        var band = document.getElementById('band'+t).value;
+    function load_stats(t, d) {
+        if (document.getElementById('band'+t)) {
+            var band = document.getElementById('band'+t).value;
+        }
+        else {
+            var band = "";
+        }
         console.log('Details for ' + t + ' on ' + band);
+
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=' + t + '&band=' + band, true);
+        request.onreadystatechange = function() {
+                var done = 4, ok = 200;
+                if (request.readyState == done && request.status == ok) {
+                        if (request.responseText) {
+                                var s = document.getElementById(d);
+								s.innerHTML = request.responseText;
+                        }
+                };
+        }
+        request.send();
 
     }
     </script>
@@ -53,7 +74,7 @@ function stats($c) {
 }
 
 function award_details($t, $b) {
-    $ret = "<button id='$t' onClick='javascript:details(this.id);'>Show details</button>";
+    $ret = "<button id='$t' onClick='javascript:load_stats(this.id, \"details\");'>Show details</button>";
 
     if ($b) {
         $ret .= "<select name=\"band\" id=\"band$t\" size=1>
@@ -89,6 +110,23 @@ function aca($c) {
     $ret .= "</table>";
     return $ret;
 }
+
+function cma($c) {
+    global $db;
+    $ret = "";
+    $q = mysqli_query($db, "SELECT nr, hiscall, date, band from cwops_log where `mycall`='$c' group by nr, band");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+    $cnt = 1;
+    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td></tr>\n";
+    }
+    $ret .= "</table>";
+    return $ret;
+}
+
 
 function was($c, $b) {
     global $db;
@@ -178,18 +216,21 @@ function dxcc($c, $b) {
 # 3. Iterate through imported log and based on (1) decide which QSOs are saved in the database.
 
 function import($adif, $callsign) {
+    $ret = "Starting import for $callsign...<br>";
     $members = get_memberlist();
+    $ret .= "Loaded member list with ".count($members)." entries.<br>";
     $qsos = parse_adif($adif, $members);
-
-    print_r($qsos);
-
-    echo "HHHHHHHHHHHHHHHHHHHHHHHHH\n";
-
+    $ret .= "Parsed ADIF with ".count($qsos)." QSOs with CWops members.<br>";
     $qsos = filter_qsos($qsos, $callsign);
+    $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
 
-    print_r($qsos);
+    $ret .= "<pre>";
+    foreach ($qsos as $q) {
+        $ret .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
+    }
+    $ret .= "</pre>";
 
-
+    return $ret;
 }
 
 function get_memberlist() {

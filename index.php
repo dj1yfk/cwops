@@ -20,10 +20,45 @@ include('functions.php');
 if ($_SESSION['id']) {
 ?>
     <p>Logged in as <?=$_SESSION['callsign'];?>. <a href="/logout">Log out</a></p>
+
+    <P>Upload new ADIF:
+    <input type="file" id="file" /> <button id='upload' onClick='javascript:upload();'>Upload</button>
+    </p>
+
+    <div id="upload_result"></div>
+
+    <script>
+    function upload () {
+        document.getElementById('upload').disabled = true;
+        document.getElementById('upload').innerHTML = "Upload in progress...";
+        var f = document.getElementById('file');
+        var file = f.files[0];
+        var data = new FormData();
+        data.append("uploaded_file", file);
+        var request =  new XMLHttpRequest();
+        request.open("POST", '/api?action=upload', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    document.getElementById('upload_result').innerHTML = request.responseText;
+                    load_stats('overview', 'stat_main');
+                }
+            }
+            document.getElementById('upload').disabled = false;
+            document.getElementById('upload').innerHTML= "Upload";
+        }
+        request.send(data);
+    }
+    </script>
+
+<br>
+<div id="stat_main">
 <?
-
     echo stats($_SESSION['callsign']);
-
+?>
+</div>
+<?
 }
 else {
 ?>
