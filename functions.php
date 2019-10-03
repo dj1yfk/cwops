@@ -19,7 +19,7 @@ function stats($c) {
 
     $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where `mycall`='$c'");
     $r = mysqli_fetch_row($q);
-    $was = $r[0]; # empty state
+    $was = $r[0]-1; # empty state
     if ($was == -1) {
         $was = 0;
     }
@@ -350,6 +350,13 @@ function parse_adif($adif, $members) {
                     
                     if ($qso['dxcc'] == 0) {
                         $qso['dxcc'] = lookup($qsocall, 'adif');
+                    }
+
+                    # remove state for cases where it's not applicable, e.g.
+                    # KP2/W1XYZ
+                    #                   USA                   KL7					KH6
+                    if ($qso['dxcc'] != 291 && $qso['dxcc'] != 6 && $qso['dxcc'] != 110) {
+                        $qso['was'] = "";
                     }
 
                     array_push($out, $qso);
