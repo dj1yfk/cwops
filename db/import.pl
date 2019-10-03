@@ -16,6 +16,7 @@ while (my $line = <>) {
     my $callsign = $a[3];
     my $joined = $a[21];
     my $left = $a[22];
+    my $state = ($a[23] eq "K" or $a[23] eq "KL" or $a[23] eq "KH6") ? $a[24] : "";
  
     $joined = &dateformat($joined);
     if ($left) {
@@ -25,7 +26,7 @@ while (my $line = <>) {
         $left = "20990101";
     }
 
-    print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`) VALUES ('$nr', '$callsign', '$joined', '$left');\n";
+    print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$callsign', '$joined', '$left', '$state');\n";
 }
 
 
