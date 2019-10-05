@@ -344,7 +344,12 @@ function parse_adif($adif, $members) {
                         $qso['dxcc'] = 0;
                     }
 
-                    if ($qso['waz'] == 0) {
+                    # sanitize WAZ: Some logs may contain the ITU zone instead
+                    # of the CQ zone in the CQZ field, or a completely invalid
+                    # value.
+
+                    $itu = lookup($qsocall, 'itu');
+                    if ($qso['waz'] == 0 or $qso['waz'] > 40 or $qso['waz'] == $itu) {
                         $qso['waz'] = lookup($qsocall, 'waz');
                     }
                     
