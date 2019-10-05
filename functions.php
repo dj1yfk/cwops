@@ -352,6 +352,11 @@ function parse_adif($adif, $members) {
                         $qso['dxcc'] = lookup($qsocall, 'adif');
                     }
 
+                    # as per WAS rules, DC counts as Maryland
+                    if ($qso['state'] == "DC") {
+                        $qso['state'] = "MD";
+                    }
+
                     # remove state for cases where it's not applicable, e.g.
                     # KP2/W1XYZ
                     #                   USA                   KL7					KH6
@@ -538,6 +543,7 @@ function get_log ($call) {
     }
     return $out;
 }
+
 
 #import(file_get_contents("dj1yfk.adi"), "DJ1YFK");
 
