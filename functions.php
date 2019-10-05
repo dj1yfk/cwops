@@ -353,8 +353,8 @@ function parse_adif($adif, $members) {
                     }
 
                     # as per WAS rules, DC counts as Maryland
-                    if ($qso['state'] == "DC") {
-                        $qso['state'] = "MD";
+                    if ($qso['was'] == "DC") {
+                        $qso['was'] = "MD";
                     }
 
                     # remove state for cases where it's not applicable, e.g.
