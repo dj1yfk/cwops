@@ -1,7 +1,10 @@
 <?php
 include_once("db.php");
+include_once("states.php");
+include_once("dxccs.php");
+include_once("wae.php");
 
-$states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
+$arr_states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
 
 
 function stats($c) {
@@ -132,7 +135,7 @@ function cma($c) {
 
 function was($c, $b) {
     global $db;
-    global $states; 
+    global $arr_states; 
 
     $ret = "<h2>WAS details for $c";
     if ($b != "all") {
@@ -146,7 +149,7 @@ function was($c, $b) {
         echo mysqli_error($db);
     }
 
-    $states_needed = $states;
+    $states_needed = $arr_states;
     
     $cnt = 1;
     $ret .= "<table><tr><th>Count</th><th>State</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
@@ -556,6 +559,147 @@ function get_log ($call) {
         array_push($out, $r);
     }
     return $out;
+}
+
+function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $waev, $edit) {
+    global $dxcc;
+    global $states;
+    global $waes;
+?>
+<tr>
+<td>
+<input type="text" name="callsign<?=$edit;?>" value="<?=$callsignv;?>" size=10>
+</td>
+<td>
+<input type="text" name="nr<?=$edit;?>" value="<?=$nrv;?>" size=4>
+</td>
+<td>
+<input type="text" name="date<?=$edit;?>" placeholder="YYYY-MM-DD" value="<?=$datev;?>" size=10>
+</td>
+<td>
+<input type="text" name="band<?=$edit;?>" value="<?=$bandv;?>" size=4>
+</td>
+<td>
+<select name="dxcc<?=$edit;?>" size="1">
+<?
+    if ($dxccv == "") {
+?>
+    <option value='0'>any</option>
+<?
+    }
+    foreach ($dxcc as $n => $d) {
+        $selected = ($n == $dxccv) ? " selected" : "";
+        echo "<option value='$n'$selected>".$d." ($n)</option>\n";
+    }
+?>
+</select>
+</td>
+<td>
+<select name="waz<?=$edit;?>" size="1">
+<?
+    if ($wazv == "") {
+?>
+    <option value='0'>any</option>
+<?
+    }
+    for ($i = 1; $i <= 40; $i++) {
+        $selected = ($i == $wazv) ? " selected" : "";
+        echo "<option value='$i'$selected>".$i."</option>\n";
+    }
+?>
+</select>
+</td>
+<td>
+<select name="was<?=$edit;?>" size="1">
+<?
+    if ($wasv == "") {
+?>
+    <option value='0'>any/none</option>
+<?
+    }
+    foreach ($states as $n => $d) {
+        $selected = ($d == $wasv) ? " selected" : "";
+        echo "<option value='$d'$selected>".$d."</option>\n";
+    }
+?>
+</select>
+</td>
+<td>
+<select name="wae<?=$edit;?>" size="1">
+<?
+    if ($waev == "") {
+?>
+    <option value='0'>any/none</option>
+<?
+    }
+    foreach ($waes as $n => $d) {
+        $selected = ($n == $waev) ? " selected" : "";
+        echo "<option value='$n'$selected>".$d." (".$n.")</option>\n";
+    }
+?>
+</select>
+</td>
+<?
+    if ($edit) {
+?>
+<td><button>Save</button></td>
+<?
+    }
+?>
+</tr>
+<?
+}
+
+
+
+function validate_get ($i) {
+    $val = $_GET[$i];
+    return validate($i, $val);
+}
+
+function validate ($type, $value) {
+    switch ($type) {
+    case 'callsign':
+        $value = strtoupper($value);
+        if (preg_match('/^[A-Z0-9\/]+$/', $value)) {
+            return $value;
+        }
+        else {
+            return "";
+        }
+        break;
+    case 'nr':
+    case 'dxcc':
+    case 'waz':
+    case 'band':
+        if (is_numeric($value)) {
+            return $value;
+        }
+        else {
+            return 0;
+        }
+        break;
+    case 'was':
+    case 'wae':
+        $value = strtoupper($value);
+        if (preg_match('/^[A-Z]{2,2}$/', $value)){
+            return $value;
+        }
+        else {
+            return "";
+        }
+        break;
+    case 'date':
+        if (preg_match('/^[0-9]{4,4}-[0-9]{2,2}-[0-9]{2,2}$/', $value)) {
+            return $value;
+        }
+        else {
+            return "";
+        }
+        break;
+    default:
+        return "";
+    }
 }
 
 

@@ -24,6 +24,8 @@ ol {
 </head>
 <body>
 
+<p>*** copy of foc.dj1yfk.de -- needs some editing before release ***
+</p>
 <h1>Impressum - Kontakt</h1>
 
 <p> Diese Webseite wird betrieben von / This website is operated by</p>

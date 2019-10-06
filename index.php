@@ -65,6 +65,7 @@ if ($_SESSION['id']) {
         var callsign = document.searchform.callsign.value;
         var nr = document.searchform.nr.value;
         var band = document.searchform.band.value;
+        var ddate = document.searchform.band.value;
         var dxcc = document.searchform.dxcc.value;
         var waz = document.searchform.waz.value;
         var was = document.searchform.was.value;
@@ -72,9 +73,22 @@ if ($_SESSION['id']) {
 
         console.log("search " + callsign + " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae);
 
-
-
-
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=search&callsign=' + callsign + "&nr=" + nr + "&date=" + ddate + "&band=" + band + "&dxcc=" + dxcc + "&waz=" + waz + "&was=" + was + "&wae=" + wae, true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    console.log("Reply:" + request.responseText);
+                    document.getElementById('search_results').innerHTML = request.responseText;
+                }
+            }
+            else if (request.readyState == done) {
+                document.getElementById('search_results').innerHTML = "An error occured. Please try again."; 
+            }
+        }
+        console.log("sent...");
+        request.send();
     }
 
     </script>
@@ -96,69 +110,16 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
 <form name="searchform">
 <table>
 <tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th></tr>
-<tr>
-<td>
-   <input type="text" name="callsign" size=10>
-</td>
-<td>
-   <input type="text" name="nr" size=4>
-</td>
-<td>
-   <input type="text" name="date" placeholder="YYYY-MM-DD" size=10>
-</td>
-<td>
-   <input type="text" name="band" size=4>
-</td>
-<td>
-<select name="dxcc" size="1">
-<option value='0'>any</option>
-<?
-    include_once("dxccs.php");
-    foreach ($dxcc as $n => $d) {
-        echo "<option value='$n'>".$d."</option>\n";
-    }
-?>
-</select>
-</td>
-<td>
-<select name="waz" size="1">
-<option value='0'>any</option>
-<?
-    for ($i = 1; $i <= 40; $i++) {
-        echo "<option value='$i'>".$i."</option>\n";
-    }
-?>
-</select>
-</td>
-<td>
-<select name="was" size="1">
-<option value='0'>any</option>
-<?
-    include_once("states.php");
-    foreach ($states as $n => $d) {
-        echo "<option value='$d'>".$d."</option>\n";
-    }
-?>
-</select>
-</td>
-<td>
-<select name="wae" size="1">
-<option value='0'>any</option>
-<?
-    include_once("wae.php");
-    foreach ($waes as $n => $d) {
-        echo "<option value='$n'>".$d." (".$n.")</option>\n";
-    }
-?>
-</select>
-</td>
 
+<?
+    editformline("", "", "", "", "", "", "", "", "");
+?>
 </table>
 </form>
 
 <br>
 
-<div="search_results">
+<div id="search_results">
 </div>
 
 </div> <!-- edit_div -->
