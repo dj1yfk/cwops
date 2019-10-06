@@ -42,6 +42,8 @@ function stats($c) {
 <tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 1);?></td></tr>
 </table>
 
+<br>
+
 <div id="details"></div>
 
     <script>
@@ -97,7 +99,7 @@ function award_details($t, $b) {
 
 function aca($c) {
     global $db;
-    $ret = "";
+    $ret = "<h2>ACA details for $c</h2>";
     $q = mysqli_query($db, "SELECT `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) group by `nr`");
     if(!$q) {
         echo mysqli_error($db);
@@ -113,7 +115,7 @@ function aca($c) {
 
 function cma($c) {
     global $db;
-    $ret = "";
+    $ret = "<h2>CMA details for $c</h2>";
     $q = mysqli_query($db, "SELECT nr, hiscall, date, band from cwops_log where `mycall`='$c' group by nr, band");
     if(!$q) {
         echo mysqli_error($db);
@@ -132,9 +134,12 @@ function was($c, $b) {
     global $db;
     global $states; 
 
+    $ret = "<h2>WAS details for $c";
     if ($b != "all") {
         $band = " and band=$b ";
+        $ret .= " (".$b."m)";
     }
+    $ret .= "</h2>"; 
 
     $q = mysqli_query($db, "SELECT `was`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c'  and LENGTH(`was`) = 2 $band group by `was`");
     if(!$q) {
@@ -144,7 +149,7 @@ function was($c, $b) {
     $states_needed = $states;
     
     $cnt = 1;
-    $ret = "<table><tr><th>Count</th><th>State</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    $ret .= "<table><tr><th>Count</th><th>State</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
         $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
         unset($states_needed[$r[0]]);
@@ -156,11 +161,13 @@ function was($c, $b) {
 
 function waz($c, $b) {
     global $db;
-    $ret = "";
+    $ret = "<h2>WAZ details for $c";
 
     if ($b != "all") {
         $band = " and band=$b ";
+        $ret .= " (".$b."m)";
     }
+    $ret .="</h2>";
 
     $q = mysqli_query($db, "SELECT `waz`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and waz > 0 $band group by `waz`");
     if(!$q) {
@@ -179,11 +186,13 @@ function waz($c, $b) {
 function dxcc($c, $b) {
     global $db;
     include("dxccs.php");
-    $ret = "";
+    $ret = "<h2>DXCC details for $c";
 
     if ($b != "all") {
         $band = " and band=$b ";
+        $ret .= " (".$b."m)";
     }
+    $ret .="</h2>";
 
     $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc > 0 $band group by `dxcc`");
     if(!$q) {
