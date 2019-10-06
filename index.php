@@ -13,7 +13,7 @@ include('functions.php');
 		</head>
 		<body>
 				<h1>CWops Award Tools</h1>
-				<p>This server provides services for members of <a href="https://cwops.org/">CWops</a>. It's maintained by <a href="https://fkurz.net">Fabian, DJ1YFK</a> (CWops #1566) and is not an official web site of the club.</p> <hr>
+				<p>This server provides services for members of <a href="https://cwops.org/">CWops</a>. It's maintained by <a href="https://fkurz.net">Fabian, DJ1YFK</a> (CWops #1566) and is not (yet!) an official web site of the club.</p> <hr>
 
 <h2>ACA, CMA, WAS, WAE and WAZ tracking</h2>
 <?
@@ -45,15 +45,125 @@ if ($_SESSION['id']) {
                     load_stats('overview', 'stat_main');
                 }
             }
+            else if (request.readyState == done) {
+                document.getElementById('upload_result').innerHTML = "An error occured during the upload. Please try again. Split very large ADIF files (> 20MB) into smaller parts if possible.";
+            }
             document.getElementById('upload').disabled = false;
             document.getElementById('upload').innerHTML= "Upload";
         }
         request.send(data);
     }
+
+    function show(item) {
+        document.getElementById("stats_div").style.display = "none";
+        document.getElementById("edit_div").style.display = "none";
+        document.getElementById("log_div").style.display = "none";
+        document.getElementById(item + "_div").style.display = "inline"; 
+    }
+
+    function search () {
+        var callsign = document.searchform.callsign.value;
+        var nr = document.searchform.nr.value;
+        var band = document.searchform.band.value;
+        var dxcc = document.searchform.dxcc.value;
+        var waz = document.searchform.waz.value;
+        var was = document.searchform.was.value;
+        var wae = document.searchform.wae.value;
+
+        console.log("search " + callsign + " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae);
+
+
+
+
+    }
+
     </script>
 
 <br>
-<div id="stat_main">
+
+<button id='stats' onClick="javascript:show(this.id);">Show Stats</button>
+<button id='edit' onClick="javascript:show(this.id);">Edit QSOs</button>
+<button id='log' onClick="javascript:show(this.id);">Enter QSOs</button>
+
+<br>
+
+<div id="edit_div" style="display:none;">
+<h2>Edit a QSO</h2>
+<p>Here you can edit a QSO you previously
+uploaded to the database. Enter at least one
+search item below and hit <button id='search' onClick="javascript:search();">Search</button>.</p>
+
+<form name="searchform">
+<table>
+<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th></tr>
+<tr>
+<td>
+   <input type="text" name="callsign" size=10>
+</td>
+<td>
+   <input type="text" name="nr" size=4>
+</td>
+<td>
+   <input type="text" name="date" placeholder="YYYY-MM-DD" size=10>
+</td>
+<td>
+   <input type="text" name="band" size=4>
+</td>
+<td>
+<select name="dxcc" size="1">
+<option value='0'>any</option>
+<?
+    include_once("dxccs.php");
+    foreach ($dxcc as $n => $d) {
+        echo "<option value='$n'>".$d."</option>\n";
+    }
+?>
+</select>
+</td>
+<td>
+<select name="waz" size="1">
+<option value='0'>any</option>
+<?
+    for ($i = 1; $i <= 40; $i++) {
+        echo "<option value='$i'>".$i."</option>\n";
+    }
+?>
+</select>
+</td>
+<td>
+<select name="was" size="1">
+<option value='0'>any</option>
+<?
+    include_once("states.php");
+    foreach ($states as $n => $d) {
+        echo "<option value='$d'>".$d."</option>\n";
+    }
+?>
+</select>
+</td>
+<td>
+<select name="wae" size="1">
+<option value='0'>any</option>
+<?
+    include_once("wae.php");
+    foreach ($waes as $n => $d) {
+        echo "<option value='$n'>".$d." (".$n.")</option>\n";
+    }
+?>
+</select>
+</td>
+
+</table>
+</form>
+
+<br>
+
+<div="search_results">
+</div>
+
+</div> <!-- edit_div -->
+<div id="log_div" style="display:none;">Log</div>
+<div id="stats_div">
 <?
     echo stats($_SESSION['callsign']);
 ?>
@@ -83,7 +193,7 @@ else {
 		if (!$_SERVER['HTTPS']) { ?> - <a rel="nofollow" href="https://cwops.telegraphy.de/">Switch to https</a> <? } 
 		else { ?> - <a rel="nofollow" href="http://cwops.telegraphy.de/">Switch to http</a> <? } 
 ?>
-- <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Souce code repository</a>
+- <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Source code repository</a>
 </p>
 
 </body>
