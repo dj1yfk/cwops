@@ -31,7 +31,7 @@ function log_in_or_create ($call, $password, $recursive) {
 
     if ($user) {
         if (password_verify($password, $user->password)) {
-            header("Location: http://cwops.telegraphy.de/");
+            header("Location: https://cwops.telegraphy.de/");
             $_SESSION['id'] = $user->id;
             $_SESSION['callsign'] = $user->callsign;
             echo "Login successful! Forwarding...";
