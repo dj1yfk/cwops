@@ -561,14 +561,14 @@ function get_log ($call) {
     return $out;
 }
 
-function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $waev, $edit) {
+function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $waev, $edit) {
     global $dxcc;
     global $states;
     global $waes;
 ?>
 <tr>
 <td>
-<input type="text" name="callsign<?=$edit;?>" id="callsign<?=$edit;?>" value="<?=$callsignv;?>" size=10>
+<input type="text" name="hiscall<?=$edit;?>" id="hiscall<?=$edit;?>" value="<?=$hiscallv;?>" size=10>
 </td>
 <td>
 <input type="text" name="nr<?=$edit;?>" id="nr<?=$edit;?>" value="<?=$nrv;?>" size=4>
@@ -660,6 +660,8 @@ function validate_get ($i) {
 function validate ($type, $value) {
     switch ($type) {
     case 'callsign':
+    case 'hiscall':
+    case 'mycall':
         $value = strtoupper($value);
         if (preg_match('/^[A-Z0-9\/]+$/', $value)) {
             return $value;
@@ -672,6 +674,7 @@ function validate ($type, $value) {
     case 'dxcc':
     case 'waz':
     case 'band':
+    case 'id':
         if (is_numeric($value)) {
             return $value;
         }

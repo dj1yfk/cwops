@@ -43,6 +43,9 @@
     case 'search':
         search();
         break;
+    case 'save':
+        save();
+        break;
     }
 
     function upload() {
@@ -59,10 +62,88 @@
         }
     }
 
+    function save() {
+        global $db;
+
+        $postdata = file_get_contents("php://input");
+
+        error_log($postdata);
+
+        if ($o = json_decode($postdata)) {
+            # check validity
+
+            $items = array("id", "hiscall", "nr", "date", "band", "dxcc", "waz", "was", "wae");
+
+            if ($o->was == "0") {
+                $o->was = "";
+            }
+            if ($o->wae == "0") {
+                $o->wae = "";
+            }
+
+            $err = "";
+            foreach ($items as $i) {
+                if (!validate($i, $o->$i) && $o->$i != "") {
+                    $err .= "$i (".$o->$i.") ";
+                } 
+            }
+
+            if ($err) {
+                echo "Invalid data: ".$err;
+                return;
+            }
+
+            $o->hiscall = strtoupper($o->hiscall);
+
+            # fetch the original QSO with this id
+            $q = mysqli_query($db, "select * from cwops_log where `id`=".$o->id." and mycall='".$_SESSION['callsign']."'");
+            if ($orig = mysqli_fetch_object($q)) {
+
+                # check what changed
+                $changes = array();
+                $sql = array();
+                foreach ($items as $i) {
+                    if ($o->$i != $orig->$i) {
+                        array_push($changes, "$i (".$orig->$i." --> ".$o->$i.")");
+                        array_push($sql, "$i = '".$o->$i."'");
+                        
+                    }
+                }
+
+                if (count($changes)) {
+                    echo "Changes: ".implode(', ', $changes)."\n\n";
+                    $query = "update cwops_log set ".implode(', ', $sql)." where id=".$o->id;
+                    $q = mysqli_query($db, $query);
+
+                    if ($q) {
+                        echo "Done";
+                    }
+                    else {
+                        echo "Database error";
+                    }
+
+
+                }
+                else {
+                    echo "Nothing changed.";
+                }
+
+            }
+            else {
+                echo "You tried to edit a QSO that is not in the database...";
+                return;
+            }
+        }
+        else {
+            echo "invalid data" + $postdata;
+        }
+    }
+
+
 
     function search () {
         global $db;
-        $callsign = validate_get('callsign');
+        $hiscall = validate_get('hiscall');
         $nr = validate_get('nr');
         $date = validate_get('date');
         $band = validate_get('band');
@@ -75,8 +156,8 @@
 
         $conditions = array();
 
-        if ($callsign) {
-            array_push($conditions, " hiscall like '%$callsign%' ");
+        if ($hiscall) {
+            array_push($conditions, " hiscall like '%$hiscall%' ");
         }
 
         if ($nr) {

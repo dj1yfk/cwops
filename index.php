@@ -62,7 +62,7 @@ if ($_SESSION['id']) {
     }
 
     function search () {
-        var callsign = document.searchform.callsign.value;
+        var hiscall = document.searchform.hiscall.value;
         var nr = document.searchform.nr.value;
         var band = document.searchform.band.value;
         var ddate = document.searchform.band.value;
@@ -71,15 +71,14 @@ if ($_SESSION['id']) {
         var was = document.searchform.was.value;
         var wae = document.searchform.wae.value;
 
-        console.log("search " + callsign + " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae);
+        console.log("search " + hiscall+ " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae);
 
         var request =  new XMLHttpRequest();
-        request.open("GET", '/api?action=search&callsign=' + callsign + "&nr=" + nr + "&date=" + ddate + "&band=" + band + "&dxcc=" + dxcc + "&waz=" + waz + "&was=" + was + "&wae=" + wae, true);
+        request.open("GET", '/api?action=search&hiscall=' + hiscall + "&nr=" + nr + "&date=" + ddate + "&band=" + band + "&dxcc=" + dxcc + "&waz=" + waz + "&was=" + was + "&wae=" + wae, true);
         request.onreadystatechange = function() {
             var done = 4, ok = 200;
             if (request.readyState == done && request.status == ok) {
                 if (request.responseText) {
-                    console.log("Reply:" + request.responseText);
                     document.getElementById('search_results').innerHTML = request.responseText;
                 }
             }
@@ -87,13 +86,35 @@ if ($_SESSION['id']) {
                 document.getElementById('search_results').innerHTML = "An error occured. Please try again."; 
             }
         }
-        console.log("sent...");
         request.send();
     }
 
     function save (id) {
-        var callsign = document.getElementById('callsign' + id).value;
-        alert(callsign);
+        var items = ['hiscall', 'nr', 'date', 'band', 'dxcc', 'waz', 'was', 'wae'];
+        var o = new Object();
+
+        for (var i = 0; i < items.length; i++) {
+            console.log(items[i] + id);
+            o[items[i]] = document.getElementById(items[i] + id).value;
+        }
+
+        o['id'] = id;
+
+        var request =  new XMLHttpRequest();
+        request.open("POST", '/api?action=save', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    alert( request.responseText);
+                }
+            }
+            else if (request.readyState == done) {
+                alert("An error occured. Please try again.");
+            }
+        }
+        console.log(o);
+        request.send(JSON.stringify(o));
     }
 
     </script>
@@ -110,7 +131,7 @@ if ($_SESSION['id']) {
 <h2>Edit a QSO</h2>
 <p>Here you can edit a QSO you previously
 uploaded to the database. Enter at least one
-search item below and hit <button id='search' onClick="javascript:search();">Search</button>.</p>
+search item below and hit <button id='search' onClick="javascript:search();">Search</button>. <b>This is under construction... save function not working yet!</b></p>
 
 <form name="searchform">
 <table>
