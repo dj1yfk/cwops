@@ -10,6 +10,9 @@
     $bands = array("160", "80", "60", "40", "30", "20", "17", "15", "12", "10", "6", "2", "all");
 
     switch ($_GET['action']) {
+    case 'stats':
+        echo stats($_SESSION['callsign']);
+        break;
     case 'aca':
         echo aca($_SESSION['callsign']);
         break;
@@ -83,7 +86,16 @@
 
             $err = "";
             foreach ($items as $i) {
-                if (!validate($i, $o->$i) && $o->$i != "") {
+
+                if (($i == "was" or $i == "wae") && $o->$i == "") {
+                    continue;
+                }
+
+                if ($i == "id" && $o->$i == 0) {
+                    continue;
+                }
+
+                if (!validate($i, $o->$i)) {
                     $err .= "$i (".$o->$i.") ";
                 } 
             }
@@ -95,43 +107,57 @@
 
             $o->hiscall = strtoupper($o->hiscall);
 
-            # fetch the original QSO with this id
-            $q = mysqli_query($db, "select * from cwops_log where `id`=".$o->id." and mycall='".$_SESSION['callsign']."'");
-            if ($orig = mysqli_fetch_object($q)) {
+            # EDIT an existing QSO
+            if ($o->id) {
+                $q = mysqli_query($db, "select * from cwops_log where `id`=".$o->id." and mycall='".$_SESSION['callsign']."'");
+                if ($orig = mysqli_fetch_object($q)) {
 
-                # check what changed
-                $changes = array();
-                $sql = array();
-                foreach ($items as $i) {
-                    if ($o->$i != $orig->$i) {
-                        array_push($changes, "$i (".$orig->$i." --> ".$o->$i.")");
-                        array_push($sql, "$i = '".$o->$i."'");
-                        
+                    # check what changed
+                    $changes = array();
+                    $sql = array();
+                    foreach ($items as $i) {
+                        if ($o->$i != $orig->$i) {
+                            array_push($changes, "$i (".$orig->$i." --> ".$o->$i.")");
+                            array_push($sql, "$i = '".$o->$i."'");
+
+                        }
                     }
-                }
 
-                if (count($changes)) {
-                    echo "Changes: ".implode(', ', $changes)."\n\n";
-                    $query = "update cwops_log set ".implode(', ', $sql)." where id=".$o->id;
-                    $q = mysqli_query($db, $query);
+                    if (count($changes)) {
+                        echo "Changes: ".implode(', ', $changes)."\n\n";
+                        $query = "update cwops_log set ".implode(', ', $sql)." where id=".$o->id;
+                        $q = mysqli_query($db, $query);
 
-                    if ($q) {
-                        echo "Done";
+                        if ($q) {
+                            echo "Done";
+                        }
+                        else {
+                            echo "Database error";
+                        }
+
+
                     }
                     else {
-                        echo "Database error";
+                        echo "Nothing changed.";
                     }
-
 
                 }
                 else {
-                    echo "Nothing changed.";
+                    echo "You tried to edit a QSO that is not in the database...";
+                    return;
                 }
-
             }
+            # Log a new QSO
             else {
-                echo "You tried to edit a QSO that is not in the database...";
-                return;
+                $qsos = array();
+                array_push($qsos, array('call' => $o->hiscall, 'nr' => $o->nr, 'date' => $o->date, 'band' => $o->band, 'dxcc' => $o->dxcc, 'was' => $o->was, 'waz' => $o->waz, 'wae' => $o->wae));
+                $qso_filtered =  filter_qsos($qsos, $_SESSION['callsign']);
+                if (count($qso_filtered)) {
+                    echo "QSO: ".$qso_filtered[0]['call']." ".$qso_filtered[0]['date']." ".$qso_filtered[0]['band']." needed for: ".$qso_filtered[0]['reasons']."<br>";
+                }
+                else {
+                    echo "QSO not added (not a new point for any award).";
+                } 
             }
         }
         else {

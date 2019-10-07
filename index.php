@@ -90,6 +90,7 @@ if ($_SESSION['id']) {
     }
 
     function save (id) {
+        //try {
         var items = ['hiscall', 'nr', 'date', 'band', 'dxcc', 'waz', 'was', 'wae'];
         var o = new Object();
 
@@ -111,17 +112,42 @@ if ($_SESSION['id']) {
             }
             else if (request.readyState == done) {
                 alert("An error occured. Please try again.");
+                return false;
             }
         }
-        console.log(o);
+        console.log(JSON.stringify(o));
         request.send(JSON.stringify(o));
+        //}
+        /* catch (e) {
+            alert("An error occured..." + e);
+            return false;
+    }*/
+    }
+
+    function reload_stats() {
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=stats', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    document.getElementById('stats_div').innerHTML = request.responseText;
+                }
+            }
+            else if (request.readyState == done) {
+                document.getElementById('stats_div').innerHTML = "Error loading stats...";
+            }
+        }
+        request.send();
+
+
     }
 
     </script>
 
 <br>
 
-<button id='stats' onClick="javascript:show(this.id);">Show Stats</button>
+<button id='stats' onClick="javascript:show(this.id);reload_stats();">Show Stats</button>
 <button id='edit' onClick="javascript:show(this.id);">Edit QSOs</button>
 <button id='log' onClick="javascript:show(this.id);">Enter QSOs</button>
 
@@ -131,7 +157,7 @@ if ($_SESSION['id']) {
 <h2>Edit a QSO</h2>
 <p>Here you can edit a QSO you previously
 uploaded to the database. Enter at least one
-search item below and hit <button id='search' onClick="javascript:search();">Search</button>. <b>This is under construction... save function not working yet!</b></p>
+search item below and hit <button id='search' onClick="javascript:search();">Search</button>.
 
 <form name="searchform">
 <table>
@@ -149,7 +175,19 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
 </div>
 
 </div> <!-- edit_div -->
-<div id="log_div" style="display:none;">Log</div>
+<div id="log_div" style="display:none;">
+<h2>Log contacts manually</h2>
+<p>Here you can easily enter contacts manually, for example to add QSOs with members on DXpeditions.</p>
+<!-- form name="enterform" -->
+<table>
+<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Save</th></tr>
+<?
+    editformline("", "", "", "", "", "", "", "", "new");
+?>
+</table>
+<!-- /form -->
+
+</div>
 <div id="stats_div">
 <?
     echo stats($_SESSION['callsign']);

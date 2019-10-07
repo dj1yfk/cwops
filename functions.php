@@ -542,11 +542,13 @@ function new_waz($qso, $c) {
 
 function insert_qso($qso, $c) {
     global $db;
-    $q = mysqli_query($db, "INSERT into cwops_log (`mycall`, `date`, `year`, `band`, `nr`, `hiscall`, `dxcc`, `wae`, `waz`, `was`) VALUES ".
+    $query = "INSERT into cwops_log (`mycall`, `date`, `year`, `band`, `nr`, `hiscall`, `dxcc`, `wae`, `waz`, `was`) VALUES ".
         "('$c', '".$qso['date']."', '".substr($qso['date'], 0, 4)."', ".$qso['band'].", ".$qso['nr'].", '".$qso['call']."', ".$qso['dxcc'].",
-            '".$qso['wae']."', ".$qso['waz'].", '".$qso['was']."');");
+            '".$qso['wae']."', ".$qso['waz'].", '".$qso['was']."');";
+    $q = mysqli_query($db, $query);
     if (!$q) {
         error_log(mysqli_error($db));
+        error_log($query);
     }
 }
 
@@ -565,6 +567,12 @@ function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $wa
     global $dxcc;
     global $states;
     global $waes;
+
+    if ($edit == "new") {
+        $edit = 0;
+        $new = 1;
+    }
+
 ?>
 <tr>
 <td>
@@ -640,9 +648,9 @@ function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $wa
 </select>
 </td>
 <?
-    if ($edit) {
+    if ($new or $edit) {
 ?>
-    <td><button onClick="javascript:save(<?=$edit;?>)">Save</button></td>
+    <td><button onClick="javascript:save(<?=$edit;?>);">Save</button></td>
 <?
     }
 ?>
