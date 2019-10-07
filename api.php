@@ -122,7 +122,7 @@
         while ($r = mysqli_fetch_array($q, MYSQLI_ASSOC)) {
             $count++;
 
-            editformline($r['hiscall'], $r['nr'], $r['date'], $r['band'], $r['dxcc'], $r['waz'], $r['was'], $r['wae'], $count);
+            editformline($r['hiscall'], $r['nr'], $r['date'], $r['band'], $r['dxcc'], $r['waz'], $r['was'], $r['wae'], $r['id']);
 
             if ($count > 100) {
                 echo "Stopped after 100 results. Use finer search query please.<br>";

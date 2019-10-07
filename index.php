@@ -91,6 +91,11 @@ if ($_SESSION['id']) {
         request.send();
     }
 
+    function save (id) {
+        var callsign = document.getElementById('callsign' + id).value;
+        alert(callsign);
+    }
+
     </script>
 
 <br>

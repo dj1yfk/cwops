@@ -27,7 +27,7 @@ function stats($c) {
         $was = 0;
     }
 
-    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c'");
     $r = mysqli_fetch_row($q);
     $dxcc = $r[0];
 
@@ -568,19 +568,19 @@ function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $w
 ?>
 <tr>
 <td>
-<input type="text" name="callsign<?=$edit;?>" value="<?=$callsignv;?>" size=10>
+<input type="text" name="callsign<?=$edit;?>" id="callsign<?=$edit;?>" value="<?=$callsignv;?>" size=10>
 </td>
 <td>
-<input type="text" name="nr<?=$edit;?>" value="<?=$nrv;?>" size=4>
+<input type="text" name="nr<?=$edit;?>" id="nr<?=$edit;?>" value="<?=$nrv;?>" size=4>
 </td>
 <td>
-<input type="text" name="date<?=$edit;?>" placeholder="YYYY-MM-DD" value="<?=$datev;?>" size=10>
+<input type="text" name="date<?=$edit;?>" id="date<?=$edit;?>" placeholder="YYYY-MM-DD" value="<?=$datev;?>" size=10>
 </td>
 <td>
-<input type="text" name="band<?=$edit;?>" value="<?=$bandv;?>" size=4>
+<input type="text" name="band<?=$edit;?>" id="band<?=$edit;?>" value="<?=$bandv;?>" size=4>
 </td>
 <td>
-<select name="dxcc<?=$edit;?>" size="1">
+<select name="dxcc<?=$edit;?>" id="dxcc<?=$edit;?>" size="1">
 <?
     if ($dxccv == "") {
 ?>
@@ -595,7 +595,7 @@ function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $w
 </select>
 </td>
 <td>
-<select name="waz<?=$edit;?>" size="1">
+<select name="waz<?=$edit;?>" id="waz<?=$edit;?>" size="1">
 <?
     if ($wazv == "") {
 ?>
@@ -610,7 +610,7 @@ function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $w
 </select>
 </td>
 <td>
-<select name="was<?=$edit;?>" size="1">
+<select name="was<?=$edit;?>" id="was<?=$edit;?>" size="1">
 <?
     if ($wasv == "") {
 ?>
@@ -625,7 +625,7 @@ function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $w
 </select>
 </td>
 <td>
-<select name="wae<?=$edit;?>" size="1">
+<select name="wae<?=$edit;?>" id="wae<?=$edit;?>" size="1">
 <?
     if ($waev == "") {
 ?>
@@ -642,7 +642,7 @@ function editformline($callsignv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $w
 <?
     if ($edit) {
 ?>
-<td><button>Save</button></td>
+    <td><button onClick="javascript:save(<?=$edit;?>)">Save</button></td>
 <?
     }
 ?>
