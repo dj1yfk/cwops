@@ -37,6 +37,12 @@
             echo dxcc($_SESSION['callsign'], $band);
         }
         break;
+    case 'wae':
+        $band = $_GET['band'];
+        if (in_array($band, $bands)) {     
+            echo wae($_SESSION['callsign'], $band);
+        }
+        break;
     case 'lookup':
         $call = validate_get('hiscall');
         echo lookup($call, 'json');
@@ -46,6 +52,12 @@
         break;
     case 'upload':
         upload();
+        break;
+    case 'upload_history':
+        upload_history();
+        break;
+    case 'upload_details':
+        upload_details();
         break;
     case 'search':
         search();
@@ -98,6 +110,12 @@
                 if ($i == "id" && $o->$i == 0) {
                     continue;
                 }
+
+                # strip "m" from band
+                if ($i == "band" && preg_match('/(\d+)/', $o->$i, $match)) {
+                    $o->$i = $match[1];
+                }
+
 
                 if (!validate($i, $o->$i)) {
                     $err .= "$i (".$o->$i.") ";
@@ -157,10 +175,10 @@
                 array_push($qsos, array('call' => $o->hiscall, 'nr' => $o->nr, 'date' => $o->date, 'band' => $o->band, 'dxcc' => $o->dxcc, 'was' => $o->was, 'waz' => $o->waz, 'wae' => $o->wae));
                 $qso_filtered =  filter_qsos($qsos, $_SESSION['callsign']);
                 if (count($qso_filtered)) {
-                    echo "QSO: ".$qso_filtered[0]['call']." ".$qso_filtered[0]['date']." ".$qso_filtered[0]['band']." needed for: ".$qso_filtered[0]['reasons']."<br>";
+                    echo "Saved QSO: ".$qso_filtered[0]['call']." ".$qso_filtered[0]['date']." ".$qso_filtered[0]['band']." needed for: ".$qso_filtered[0]['reasons']."\n";
                 }
                 else {
-                    echo "QSO not added (not a new point for any award).";
+                    echo "QSO not added (not a new point for any award)!";
                 } 
             }
         }
@@ -242,7 +260,47 @@
 
 
         }
-
     }
+
+
+    function upload_history () {
+        global $db;
+
+        $ret = "<h2>Upload history</h2>";
+
+        $q = mysqli_query($db, "select * from cwops_uploads where uid=".$_SESSION['id']." order by ts desc limit 25");
+
+        $ret .= "<pre>";
+        while ($r = mysqli_fetch_array($q)) {
+            $ret .= "Upload date: ".$r['ts'].", Imported QSOs: ".sprintf("%4d", $r['count']).". <a target='_new' href='/api?action=upload_details&id=".$r['id']."'>Show details</a> (opens in new window)<br>";
+        }
+        $ret .= "</pre>";
+
+        echo $ret;
+    }
+
+    function upload_details () {
+        global $db;
+
+        if (is_numeric($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        else {
+            echo "Invalid ID";
+            return;
+        }
+
+        $ret = "<pre>";
+        $q = mysqli_query($db, "select * from cwops_uploads where uid=".$_SESSION['id']." and id=$id");
+
+        while ($r = mysqli_fetch_array($q)) {
+            $ret .= "Upload date: ".$r['ts'].", Imported QSOs: ".$r['count']."<br>".$r['result'];
+        }
+        $ret .= "</pre>";
+
+        echo $ret;
+    }
+
+
 
 ?>

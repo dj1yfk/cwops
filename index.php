@@ -8,8 +8,8 @@ include('functions.php');
 				<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
 				<link rel="stylesheet" type="text/css" href="/style.css">
 				<title>CWops Award Tools</title>
-				<!-- link rel="icon" href="/favicon.ico">
-				<link rel="shortcut icon" href="/favicon.ico" -->
+				<link rel="icon" href="/favicon.ico">
+				<link rel="shortcut icon" href="/favicon.ico">
 		</head>
 		<body>
 				<h1>CWops Award Tools</h1>
@@ -42,7 +42,7 @@ if ($_SESSION['id']) {
             if (request.readyState == done && request.status == ok) {
                 if (request.responseText) {
                     document.getElementById('upload_result').innerHTML = request.responseText;
-                    load_stats('overview', 'stat_main');
+                    reload_stats();
                 }
             }
             else if (request.readyState == done) {
@@ -55,10 +55,17 @@ if ($_SESSION['id']) {
     }
 
     function show(item) {
+        document.getElementById("stats").style.fontWeight = "normal";
+        document.getElementById("edit").style.fontWeight = "normal";
+        document.getElementById("log").style.fontWeight = "normal";
+        document.getElementById("uploads").style.fontWeight = "normal";
+
         document.getElementById("stats_div").style.display = "none";
         document.getElementById("edit_div").style.display = "none";
         document.getElementById("log_div").style.display = "none";
+        document.getElementById("uploads_div").style.display = "none";
         document.getElementById(item + "_div").style.display = "inline"; 
+        document.getElementById(item).style.fontWeight = "bold";
     }
 
     function search () {
@@ -183,15 +190,29 @@ if ($_SESSION['id']) {
 
     }
 
+    function reload_upload_history() {
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=upload_history', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    document.getElementById('uploads_div').innerHTML = request.responseText;
+                }
+            }
+        }
+        request.send();
+    }
 
 
     </script>
 
 <br>
 
-<button id='stats' onClick="javascript:show(this.id);reload_stats();">Show Stats</button>
+<button id='stats' style="font-weight:bold" onClick="javascript:show(this.id);reload_stats();">Show Stats</button>
 <button id='edit' onClick="javascript:show(this.id);">Edit QSOs</button>
 <button id='log' onClick="javascript:show(this.id);">Enter QSOs</button>
+<button id='uploads' onClick="javascript:show(this.id);reload_upload_history();">Show upload history</button>
 
 <br>
 
@@ -235,6 +256,9 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
     echo stats($_SESSION['callsign']);
 ?>
 </div>
+<div id="uploads_div" style="display:none;">
+<h2>QSO upload history</h2>
+</div>
 <?
 }
 else {
@@ -248,6 +272,9 @@ else {
   <input type='submit' value='Log in or create new account'>
 </form>
 
+<p>When signing up, you accept the <a href="/privacy">privacy policy</a> of this site.</p>
+
+
 <p>Lost your password? Get in touch with <a href="mailto:fabian@fkurz.net">Fabian, DJ1YFK</a> to reset your account.</p>
 
 <?
@@ -256,10 +283,6 @@ else {
 
 <hr>
 <p>Last modified: <? echo date ("Y-m-d",  filemtime("index.php")); ?> - <a href="http://fkurz.net/">Fabian Kurz, DJ1YFK</a> <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>
-<? 
-		if (!$_SERVER['HTTPS']) { ?> - <a rel="nofollow" href="https://cwops.telegraphy.de/">Switch to https</a> <? } 
-		else { ?> - <a rel="nofollow" href="http://cwops.telegraphy.de/">Switch to http</a> <? } 
-?>
 - <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Source code repository</a>
 </p>
 

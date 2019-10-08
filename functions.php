@@ -9,6 +9,7 @@ $arr_states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>
 
 function stats($c) {
     global $db;
+    global $wae_adif;
 
     # ACA
 
@@ -31,17 +32,23 @@ function stats($c) {
     $r = mysqli_fetch_row($q);
     $dxcc = $r[0];
 
+    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).")");
+    $r = mysqli_fetch_row($q);
+    $wae = $r[0];
+
     $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where `mycall`='$c'");
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
 ?>
+    <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th></tr>
 <tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 0);?></td></tr>
 <tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 0);?></td></tr>
 <tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 1);?></td></tr>
 <tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 1);?></td></tr>
+<tr><td>WAE</td><td><?=$wae?></td><td><?=award_details('wae', 1);?></td></tr>
 <tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 1);?></td></tr>
 </table>
 
@@ -188,7 +195,8 @@ function waz($c, $b) {
 
 function dxcc($c, $b) {
     global $db;
-    include("dxccs.php");
+    global $dxcc;
+
     $ret = "<h2>DXCC details for $c";
 
     if ($b != "all") {
@@ -211,6 +219,65 @@ function dxcc($c, $b) {
     return $ret;
 }
 
+function wae($c, $b) {
+    global $db;
+    global $waes;
+    global $wae_adif;
+    global $dxcc;
+
+    $needed = array();
+    foreach (array_merge($wae_adif, array_keys($waes)) as $k) {
+        $needed[$k] = 1;
+    }
+    
+
+    $ret = "<h2>WAE details for $c";
+
+    if ($b != "all") {
+        $band = " and band=$b ";
+        $ret .= " (".$b."m)";
+    }
+    $ret .="</h2>";
+
+    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc in (".implode(',', $wae_adif).") and wae='' $band group by `dxcc`");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+
+    $cnt = 1;
+    $ret .= "<table><tr><th>Count</th><th>DXCC</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$dxcc[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
+        unset($needed[$r[0]]); 
+    }
+
+    # fetch extra WAE entities
+    $q = mysqli_query($db, "SELECT `wae`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and LENGTH(wae) = 2  $band group by `wae`");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+    
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$waes[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
+        unset($needed[$r[0]]); 
+    }
+
+    // replace numeric ADIF numbers with DXCC names and WAE abbreviations with
+    // full name
+    foreach (array_keys($needed) as $k) {
+        if (is_numeric($k)) {
+            $needed[$dxcc[$k]] = 1;
+        }
+        else {
+            $needed[$waes[$k]] = 1;
+        }
+        unset($needed[$k]);
+    }
+
+    $ret .= "</table><br>Still needed:<br>".implode('<br>', array_keys($needed));
+    return $ret;
+}
+
 
 
 # import an ADIF file to the log of $callsign
@@ -228,6 +295,8 @@ function dxcc($c, $b) {
 # 3. Iterate through imported log and based on (1) decide which QSOs are saved in the database.
 
 function import($adif, $callsign) {
+    global $db;
+
     $ret = "Starting import for $callsign...<br>";
     $members = get_memberlist();
     $ret .= "Loaded member list with ".count($members)." entries.<br>";
@@ -239,10 +308,16 @@ function import($adif, $callsign) {
     $ret .= "Full log of the import below. <a href='#' onClick='javascript:document.getElementById(\"import_log\").style.display = \"none\";'>Click here to hide</a>";
 
     $ret .= "<pre id='import_log'>";
+    $import_log = "";
     foreach ($qsos as $q) {
-        $ret .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
+        $import_log .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
     }
+    $ret .= $import_log;
     $ret .= "</pre>";
+
+    # save this to the upload history
+    $q = mysqli_query($db, "insert into cwops_uploads (`uid`, `ts`, `count`, `result`) 
+         VALUES (".$_SESSION['id'].", NOW(), ".count($qsos)." ,'".mysqli_real_escape_string($db, $import_log)."')");
 
     return $ret;
 }
@@ -345,7 +420,12 @@ function parse_adif($adif, $members) {
                         $qso['wae'] = $match[3];
                     }
                     else {
-                        $qso['wae'] = '';
+                        if (substr($qso['call'], 0, 3) == "IT9") {
+                            $qso['wae'] = 'SY';
+                        }
+                        else {
+                            $qso['wae'] = '';
+                        }
                     }
 
                     # DXCC
