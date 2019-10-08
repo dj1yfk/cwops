@@ -37,6 +37,10 @@
             echo dxcc($_SESSION['callsign'], $band);
         }
         break;
+    case 'lookup':
+        $call = validate_get('hiscall');
+        echo lookup($call, 'json');
+        break;
     case 'overview':
         echo stats($_SESSION['callsign']);
         break;

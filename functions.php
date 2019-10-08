@@ -412,6 +412,11 @@ function f2b ($f) {
 # look up calls on HamQTH's API
 # Save all data in a local Redis Database to avoid flooding the API
 function lookup ($call, $what) {
+
+    if (!$call) {
+        return "";
+    }
+
     $redis = new Redis();
     $redis->connect('127.0.0.1', 6379);
     $data = $redis->get("HamQTH".$call);
@@ -419,6 +424,10 @@ function lookup ($call, $what) {
     if (!$data) {
         error_log("Call: $call not found in Redis cache.");
         $data = file_get_contents("https://www.hamqth.com/dxcc_json.php?callsign=$call");
+    }
+
+    if ($what == 'json') {
+        return $data;
     }
 
     $o = json_decode($data);
@@ -576,7 +585,13 @@ function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $wa
 ?>
 <tr>
 <td>
-<input type="text" name="hiscall<?=$edit;?>" id="hiscall<?=$edit;?>" value="<?=$hiscallv;?>" size=10>
+<input type="text" name="hiscall<?=$edit;?>" id="hiscall<?=$edit;?>" value="<?=$hiscallv;?>" <?
+if ($new) {
+?>
+onblur="javascript:dxcc_lookup(this.value);"
+<?
+}
+?> size=10>
 </td>
 <td>
 <input type="text" name="nr<?=$edit;?>" id="nr<?=$edit;?>" value="<?=$nrv;?>" size=4>

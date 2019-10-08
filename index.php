@@ -139,9 +139,51 @@ if ($_SESSION['id']) {
             }
         }
         request.send();
+    }
 
+    // When entering a QSO manually, fill DXCC and WAZ automatically
+    // based on the callsign
+    function dxcc_lookup(c) {
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=lookup&hiscall=' + c, true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    try {
+                        var o = JSON.parse(request.responseText);
+                        if (o['adif']) {
+                            var d = document.getElementById('dxcc0');
+                            d.value = o['adif'];
+                        }
+                        if (o['waz']) {
+                            var d = document.getElementById('waz0');
+                            d.selectedIndex = o['waz'];
+                        }
+
+                    }
+                    catch {
+                        console.log("parsing lookup json failed");
+                    }
+                }
+            }
+        }
+        request.send();
+    }
+
+    function clear_form (nr) {
+        var items = ['hiscall', 'nr', 'date', 'band'];
+
+        for (var i = 0; i < items.length; i++) {
+            document.getElementById(items[i] + nr).value = "";
+        }
+        
+        document.getElementById('was' + nr).selectedIndex = 0;
+        document.getElementById('wae' + nr).selectedIndex = 0;
 
     }
+
+
 
     </script>
 
@@ -177,7 +219,7 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
 </div> <!-- edit_div -->
 <div id="log_div" style="display:none;">
 <h2>Log contacts manually</h2>
-<p>Here you can easily enter contacts manually, for example to add QSOs with members on DXpeditions.</p>
+<p>Here you can easily enter contacts manually, for example to add QSOs with members on DXpeditions. <button id='search' onClick="javascript:clear_form(0);">Clear Form</button></p>
 <!-- form name="enterform" -->
 <table>
 <tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Save</th></tr>

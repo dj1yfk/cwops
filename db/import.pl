@@ -13,10 +13,10 @@ while (my $line = <>) {
 
     my @a = split(/,/, $line);
     my $nr = $a[0];
-    my $callsign = $a[3];
-    my $joined = $a[21];
-    my $left = $a[22];
-    my $state = ($a[23] eq "K" or $a[23] eq "KL" or $a[23] eq "KH6") ? $a[24] : "";
+    my $callsign = $a[1];
+    my $joined = $a[3];
+    my $left = $a[4];
+    my $state = ($a[5] eq "K" or $a[5] eq "KL" or $a[5] eq "KH6") ? $a[6] : "";
  
     $joined = &dateformat($joined);
     if ($left) {
