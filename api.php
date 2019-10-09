@@ -1,7 +1,8 @@
 <?
     session_start();
 
-    if (!$_SESSION['id']) {
+    if (!array_key_exists('id', $_SESSION)) {
+        echo "Not logged in. Please refresh your login.";
         return;
     }
 
@@ -72,7 +73,6 @@
             $filename_original = $_FILES['uploaded_file']['name'];
             $filename_local    = "/tmp/".md5(time() . $filename_original . rand(1,999));
             error_log("Upload  $filename_original to  $filename_local");
-            
             error_log(print_r($_FILES, TRUE));
             if (move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $filename_local)) {
                 error_log("move ok");
@@ -85,8 +85,6 @@
         global $db;
 
         $postdata = file_get_contents("php://input");
-
-        error_log($postdata);
 
         if ($o = json_decode($postdata)) {
             # check validity
@@ -242,7 +240,6 @@
         }
 
         $query .= implode(" and ", $conditions);
-        error_log($query);
         $q = mysqli_query($db, $query);
 
         $count = 0;

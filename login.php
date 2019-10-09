@@ -2,7 +2,7 @@
 session_start();
 include_once('db.php');
 
-if ($_GET['f'] == 'logout') {
+if (array_key_exists('f', $_GET) && $_GET['f'] == 'logout') {
     session_destroy();
     header("Location: http://cwops.telegraphy.de/");
     return;

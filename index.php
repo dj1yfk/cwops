@@ -17,7 +17,7 @@ include('functions.php');
 
 <h2>ACA, CMA, WAS, WAE and WAZ tracking</h2>
 <?
-if ($_SESSION['id']) {
+if (array_key_exists("id", $_SESSION)) {
 ?>
     <p>Logged in as <?=$_SESSION['callsign'];?>. <a href="/logout">Log out</a></p>
 
@@ -28,6 +28,14 @@ if ($_SESSION['id']) {
     <div id="upload_result"></div>
 
     <script>
+
+    window.setInterval(keepalife, 300000);
+    function keepalife () {
+        var request =  new XMLHttpRequest();
+        request.open("GET", "/style.css", true);
+        request.send();
+    }
+
     function upload () {
         document.getElementById('upload').disabled = true;
         document.getElementById('upload').innerHTML = "Upload in progress...";
@@ -124,11 +132,6 @@ if ($_SESSION['id']) {
         }
         console.log(JSON.stringify(o));
         request.send(JSON.stringify(o));
-        //}
-        /* catch (e) {
-            alert("An error occured..." + e);
-            return false;
-    }*/
     }
 
     function reload_stats() {
@@ -169,7 +172,7 @@ if ($_SESSION['id']) {
                         }
 
                     }
-                    catch {
+                    catch (e) {
                         console.log("parsing lookup json failed");
                     }
                 }

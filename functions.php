@@ -637,7 +637,7 @@ function insert_qso($qso, $c) {
     $q = mysqli_query($db, $query);
     if (!$q) {
         error_log(mysqli_error($db));
-        error_log($query);
+        error_log("insert_qso error: ".$query);
     }
 }
 
@@ -660,6 +660,9 @@ function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $wa
     if ($edit == "new") {
         $edit = 0;
         $new = 1;
+    }
+    else {
+        $new = 0;
     }
 
 ?>
