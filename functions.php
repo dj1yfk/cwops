@@ -313,7 +313,7 @@ function import($adif, $callsign) {
 
     if (!(strstr($adif, "<eoh>") or strstr($adif, "<EOH>"))) {
         $ret .= "Data format looks like CAM exported CSV (not ADIF). Trying to convert...<br>";
-        $adif = parse_cam($adif);
+        $adif = parse_cam($adif, $members);
     }
 
     $qsos = parse_adif($adif, $members);
@@ -358,7 +358,16 @@ function get_memberlist() {
 # parse CAM CSV file format and make ADIF
 # 20100101,1111,N3JT,40M,CW,K,VA,JIM,1
 
-function parse_cam ($csv) {
+function parse_cam ($csv, $members) {
+
+    # make hash table for quicker member lookup
+    $mh = array();		# call -> info
+	$mhnr = array();	# nr   -> call
+    foreach ($members as $m) {
+        $mh[$m["callsign"]] = $m;
+		$mhnr[$m["nr"]] = $m["callsign"];
+    }
+
     $csv = strtoupper($csv);
     $csv = preg_replace('/\r/', '', $csv);
     $qsos = explode("\n", $csv);
@@ -376,9 +385,14 @@ function parse_cam ($csv) {
         $adif .= makeadi('band', $a[3]); 
         $adif .= makeadi('state', $a[6]); 
         $adif .= makeadi('mode', "CW"); 
+
+		# is this a member call? If not, but the CWops nr is valid,
+		# add the member's call as a remark
+		if (!array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
+			$adif .=  "CWO:".$mhnr[$a[8]]." ";
+		}
         $adif .= " <EOR>\n";
     }
-    file_put_contents("/tmp/adif.adi", $adif);
     return $adif;
 }
 
