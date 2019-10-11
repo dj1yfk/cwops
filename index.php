@@ -63,15 +63,14 @@ if (array_key_exists("id", $_SESSION)) {
     }
 
     function show(item) {
-        document.getElementById("stats").style.fontWeight = "normal";
-        document.getElementById("edit").style.fontWeight = "normal";
-        document.getElementById("log").style.fontWeight = "normal";
-        document.getElementById("uploads").style.fontWeight = "normal";
+        var items = [ "stats", "edit", "log", "uploads" ];
 
-        document.getElementById("stats_div").style.display = "none";
-        document.getElementById("edit_div").style.display = "none";
-        document.getElementById("log_div").style.display = "none";
-        document.getElementById("uploads_div").style.display = "none";
+        for (var i = 0; i < items.length; i++) {
+            console.log(items[i]);
+            document.getElementById(items[i]).style.fontWeight = "normal";
+            document.getElementById(items[i] + "_div").style.display = "none";
+        } 
+
         document.getElementById(item + "_div").style.display = "inline"; 
         document.getElementById(item).style.fontWeight = "bold";
     }
@@ -261,6 +260,8 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
 </div>
 <div id="uploads_div" style="display:none;">
 <h2>QSO upload history</h2>
+</div>
+<div id="summary_div" style="display:none;">
 </div>
 <?
 }

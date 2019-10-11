@@ -83,7 +83,14 @@ function stats($c) {
     </script>
 
 <?
-}
+    # finally, save to cwops_scores table
+    $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
+    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, NOW());");
+    if (!$q) {
+        error_log("score update failed".mysqli_error($db));
+    }
+
+}   # stats
 
 function award_details($t, $b) {
     $ret = "<button id='$t' onClick='javascript:load_stats(this.id, \"details\");'>Show details</button>";
@@ -291,7 +298,7 @@ function wae($c, $b) {
 
 # Steps:
 # 1. Load the current member list into an array
-# 2. Parse ADI into an array, omitting all calls that are not members (considering the date of the QSO) and non-CW-QSOs
+# 2. Parse ADIF/CSV into an array, omitting all calls that are not members (considering the date of the QSO) and non-CW-QSOs
 # 3. Iterate through imported log and based on (1) decide which QSOs are saved in the database.
 
 function import($adif, $callsign) {
@@ -300,8 +307,18 @@ function import($adif, $callsign) {
     $ret = "Starting import for $callsign...<br>";
     $members = get_memberlist();
     $ret .= "Loaded member list with ".count($members)." entries.<br>";
+
+    # detect data format. it may be ADIF or CSV export from CAM
+    # If it is CSV, convert it to ADIF first and then import it
+
+    if (!(strstr($adif, "<eoh>") or strstr($adif, "<EOH>"))) {
+        $ret .= "Data format looks like CAM exported CSV (not ADIF). Trying to convert...<br>";
+        $adif = parse_cam($adif);
+    }
+
     $qsos = parse_adif($adif, $members);
     $ret .= "Parsed ADIF with ".count($qsos)." QSOs with CWops members.<br>";
+
     $qsos = filter_qsos($qsos, $callsign);
     $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
 
@@ -319,6 +336,10 @@ function import($adif, $callsign) {
     $q = mysqli_query($db, "insert into cwops_uploads (`uid`, `ts`, `count`, `result`) 
          VALUES (".$_SESSION['id'].", NOW(), ".count($qsos)." ,'".mysqli_real_escape_string($db, $import_log)."')");
 
+    if (!$q) {
+        error_log("import: insert into cwops_upload failed: ".mysqli_error($db));
+    }
+
     return $ret;
 }
 
@@ -334,6 +355,37 @@ function get_memberlist() {
     return $members;
 }
 
+# parse CAM CSV file format and make ADIF
+# 20100101,1111,N3JT,40M,CW,K,VA,JIM,1
+
+function parse_cam ($csv) {
+    $csv = strtoupper($csv);
+    $csv = preg_replace('/\r/', '', $csv);
+    $qsos = explode("\n", $csv);
+
+    $adif = "header\n<EOH>\n";
+    foreach ($qsos as $q) {
+        $a = explode(",", $q);
+
+        if (count($a) != 9) {
+            continue;
+        }
+
+        $adif .= makeadi('qso_date', $a[0]); 
+        $adif .= makeadi('call', $a[2]); 
+        $adif .= makeadi('band', $a[3]); 
+        $adif .= makeadi('state', $a[6]); 
+        $adif .= makeadi('mode', "CW"); 
+        $adif .= " <EOR>\n";
+    }
+    file_put_contents("/tmp/adif.adi", $adif);
+    return $adif;
+}
+
+
+function makeadi ($field, $value) {
+    return "<".$field.":".strlen($value).">".$value." ";
+}
 
 # parse ADIF and return member QSOs (matched by date) 
 function parse_adif($adif, $members) {
@@ -563,15 +615,13 @@ function filter_qsos ($qsos, $callsign) {
     return $out;
 }
 
-# ACA: New QSO with this member this year?
+# ACA: New QSO with this member in the year of the QSO?
 function new_aca($qso, $c) {
     global $db;
 
-    if (substr($qso['date'], 0, 4) != date("Y")) {
-        return false;
-    }
+    $qsoyear = substr($qso['date'], 0, 4);
 
-    $query = "SELECT count(*) from cwops_log where mycall='$c' and nr=".$qso['nr']." and year=YEAR(CURDATE())";
+    $query = "SELECT count(*) from cwops_log where mycall='$c' and nr=".$qso['nr']." and year=$qsoyear";
     $q = mysqli_query($db, $query);
     $r = mysqli_fetch_row($q);
     return ($r[0] == 0); 
@@ -811,6 +861,37 @@ function validate ($type, $value) {
     }
 }
 
+function score_table() {
+    global $db;
+
+    if (!in_array($_SESSION['id'], array(18, 13, 22, 15))) {
+        echo "Only for administrators.";
+        return;
+    }
+
+    # aca / cma combined table
+    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
+    echo "<table border=1><tr><th colspan=2>".strtoupper($i)."</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        echo "<tr><td>$r[0]</td><td>$r[1]</td></tr>\n";
+    }
+    echo "</table>";
+
+    $items = array("dxcc", "was", "wae", "waz");
+
+    foreach ($items as $i) {
+        $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
+        echo "<table border=1><tr><th colspan=2>".strtoupper($i)."</th></tr>\n";
+        while ($r = mysqli_fetch_row($q)) {
+            echo "<tr><td>$r[0]</td><td>$r[1]</td></tr>\n";
+        }
+        echo "</table>";
+    }
+
+
+
+
+}
 
 #import(file_get_contents("dj1yfk.adi"), "DJ1YFK");
 
