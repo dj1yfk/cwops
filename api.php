@@ -59,7 +59,16 @@
         echo stats($_SESSION['callsign']);
         break;
     case 'upload':
-        upload();
+        if ($_GET['ign'] == "1") {
+            $ign = 1;
+        }
+        else {
+            $ign = 0;
+        }
+        upload($ign);
+        break;
+    case 'wipe':
+        wipe();
         break;
     case 'upload_history':
         upload_history();
@@ -75,15 +84,15 @@
         break;
     }
 
-    function upload() {
+    function upload($ign) {
         if (isset($_FILES['uploaded_file'])) {
             $filename_original = $_FILES['uploaded_file']['name'];
             $filename_local    = "/tmp/".md5(time() . $filename_original . rand(1,999));
             error_log("Upload  $filename_original to  $filename_local");
             error_log(print_r($_FILES, TRUE));
             if (move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $filename_local)) {
-                error_log("move ok");
-                echo import(file_get_contents($filename_local), $_SESSION['callsign']);
+                error_log("move ok. ign = $ign");
+                echo import(file_get_contents($filename_local), $_SESSION['callsign'], $ign);
             }
         }
     }
@@ -192,6 +201,17 @@
         }
     }
 
+    function wipe () {
+        global $db;
+        $q = mysqli_query($db, "delete from cwops_log where mycall='".$_SESSION['callsign']."'");
+        if ($q) {
+            echo "OK - all QSOs deleted.";
+        }
+        else {
+            echo "An error occured. Please try again.";
+            error_log(mysqli_error($db));
+        }
+    }
 
 
     function search () {

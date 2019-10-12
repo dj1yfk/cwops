@@ -22,12 +22,9 @@ function stats($c) {
     $r = mysqli_fetch_row($q);
     $cma = $r[0];
 
-    $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where length(`was`) =  2 and `mycall`='$c'");
     $r = mysqli_fetch_row($q);
-    $was = $r[0]-1; # empty state
-    if ($was == -1) {
-        $was = 0;
-    }
+    $was = $r[0];
 
     $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c'");
     $r = mysqli_fetch_row($q);
@@ -306,7 +303,9 @@ function wae($c, $b) {
 # 2. Parse ADIF/CSV into an array, omitting all calls that are not members (considering the date of the QSO) and non-CW-QSOs
 # 3. Iterate through imported log and based on (1) decide which QSOs are saved in the database.
 
-function import($adif, $callsign) {
+# If ign is set, ignore DXCC, WAZ and State info from the uploaded log
+
+function import($adif, $callsign, $ign) {
     global $db;
 
     $ret = "Starting import for $callsign...<br>";
@@ -321,7 +320,7 @@ function import($adif, $callsign) {
         $adif = parse_cam($adif, $members);
     }
 
-    $qsos = parse_adif($adif, $members);
+    $qsos = parse_adif($adif, $members, $ign);
     $ret .= "Parsed ADIF with ".count($qsos)." QSOs with CWops members.<br>";
 
     $qsos = filter_qsos($qsos, $callsign);
@@ -407,7 +406,7 @@ function makeadi ($field, $value) {
 }
 
 # parse ADIF and return member QSOs (matched by date) 
-function parse_adif($adif, $members) {
+function parse_adif($adif, $members, $ign) {
 
     $out = array();
 
@@ -471,19 +470,26 @@ function parse_adif($adif, $members) {
                     $qso['band'] = $band;
                     $qso['nr'] = $mh[$call]['nr'];
                     $qso['was'] = $mh[$call]['was'];
+                    $qso['waz'] = 0;
+                    $qso['wae'] = '';
+                    $qso['dxcc'] = 0;
 
-                    # see if there's a state in ADIF which overrides the state
-                    # from the database
-                    if (preg_match('/<STATE:\d+(:\w)?()>([A-Z]+)/', $q, $match)) {
-                        $qso['was'] = $match[3];
-                    }
+                    if (!$ign) {
+                        # see if there's a state in ADIF which overrides the state
+                        # from the database
+                        if (preg_match('/<STATE:\d+(:\w)?()>([A-Z]+)/', $q, $match)) {
+                            $qso['was'] = $match[3];
+                        }
 
-                    # CQ zone
-                    if (preg_match('/<CQZ:\d+(:\w)?()>([0-9]+)/', $q, $match)) {
-                        $qso['waz'] = $match[3];
-                    }
-                    else {
-                        $qso['waz'] = 0;
+                        # CQ zone
+                        if (preg_match('/<CQZ:\d+(:\w)?()>([0-9]+)/', $q, $match)) {
+                            $qso['waz'] = $match[3];
+                        }
+
+                        # DXCC
+                        if (preg_match('/<DXCC:\d+(:\w)?()>([0-9]+)/', $q, $match)) {
+                            $qso['dxcc'] = $match[3];
+                        }
                     }
 
                     # WAE "Region" http://adif.org/310/ADIF_310.htm#Region_Enumeration
@@ -494,17 +500,6 @@ function parse_adif($adif, $members) {
                         if (substr($qso['call'], 0, 3) == "IT9") {
                             $qso['wae'] = 'SY';
                         }
-                        else {
-                            $qso['wae'] = '';
-                        }
-                    }
-
-                    # DXCC
-                    if (preg_match('/<DXCC:\d+(:\w)?()>([0-9]+)/', $q, $match)) {
-                        $qso['dxcc'] = $match[3];
-                    }
-                    else {
-                        $qso['dxcc'] = 0;
                     }
 
                     # sanitize WAZ: Some logs may contain the ITU zone instead
@@ -515,7 +510,7 @@ function parse_adif($adif, $members) {
                     if ($qso['waz'] == 0 or $qso['waz'] > 40 or $qso['waz'] == $itu) {
                         $qso['waz'] = lookup($qsocall, 'waz', $date);
                     }
-                    
+
                     if ($qso['dxcc'] == 0) {
                         $qso['dxcc'] = lookup($qsocall, 'adif', $date);
                     }

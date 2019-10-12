@@ -23,6 +23,7 @@ if (array_key_exists("id", $_SESSION)) {
 
     <P>Upload new ADIF:
     <input type="file" id="file" /> <button id='upload' onClick='javascript:upload();'>Upload</button>
+    <input id="cbignore" type="checkbox" name="cbignore" value="1"> Ignore DXCC, CQ-Zone and State values from ADIF (will be taken from the database).
     </p>
 
     <div id="upload_result"></div>
@@ -39,12 +40,13 @@ if (array_key_exists("id", $_SESSION)) {
     function upload () {
         document.getElementById('upload').disabled = true;
         document.getElementById('upload').innerHTML = "Upload in progress...";
+        var ign = document.getElementById('cbignore').checked;
         var f = document.getElementById('file');
         var file = f.files[0];
         var data = new FormData();
         data.append("uploaded_file", file);
         var request =  new XMLHttpRequest();
-        request.open("POST", '/api?action=upload', true);
+        request.open("POST", '/api?action=upload&ign=' + (ign ? '1' : '0'), true);
         request.onreadystatechange = function() {
             var done = 4, ok = 200;
             if (request.readyState == done && request.status == ok) {
@@ -206,6 +208,25 @@ if (array_key_exists("id", $_SESSION)) {
         request.send();
     }
 
+    function wipe() {
+        if (!confirm("Really delete all QSOs?")) {
+            alert("Aborted...");
+            return;
+        }
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=wipe', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    alert(request.responseText);
+                }
+            }
+        }
+        request.send();
+    }
+
+
 
     </script>
 
@@ -238,6 +259,9 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
 
 <div id="search_results">
 </div>
+
+<br>
+If you like to start over (re-upload your whole log), you can delete all QSOs that were saved with the following button: <button id='wipe' onClick="javascript:wipe();">Delete (Reset) whole log</button>
 
 </div> <!-- edit_div -->
 <div id="log_div" style="display:none;">
