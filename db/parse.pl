@@ -9,7 +9,7 @@ use JSON;
 # Parse OK1RR's country resolution file Exception list
 #
 # =3D2AA =3D2HI =3D2HK =3D2ID =3D2KZ =3D2MU =3D2SH|Rotuma|OC|-12|12.4993S|177.0474E|56|32||R|1995/11/04-1995/11/07=460
-#
+# =3D2AA =3D2HI =3D2HK =3D2ID =3D2KZ =3D2MU =3D2SH|Rotuma|OC|-12|12.4993S|177.0474E|56|32|R|1995/11/04-1995/11/07=460
 # Fields: 
 #  0 => Callsigns
 #  1 => Name DXCC
@@ -18,9 +18,9 @@ use JSON;
 #  4, 5 => Lat/Lon
 #  6 => ITU
 #  7 => WAZ
-#  8 => empty?
-#  9 => R?
-#  10 => date range = DXCC ADIF number
+#  8 => empty? (removed in new files)
+#  8 => R?
+#  9 => date range = DXCC ADIF number
 
 # output format is JSON
 # format example:
@@ -43,7 +43,7 @@ while (my $line = <>) {
 
     foreach (@c) {
         # check date range if any. it may be in the following formats:
-        my @d = split(/=/, $a[10]);
+        my @d = split(/=/, $a[9]);
 
         my ($start, $stop) = qw/20100101 20990101/;
         if ($d[0]) {
