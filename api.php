@@ -46,7 +46,14 @@
         break;
     case 'lookup':
         $call = validate_get('hiscall');
-        echo lookup($call, 'json');
+        $date = validate_get('date');
+        if ($date) {
+            $date = preg_replace('/\-/', '', $date);
+        }
+        else {
+            $date = date("Ymd");
+        }
+        echo lookup($call, 'json', $date);
         break;
     case 'overview':
         echo stats($_SESSION['callsign']);

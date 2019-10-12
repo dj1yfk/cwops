@@ -3,6 +3,7 @@ include_once("db.php");
 include_once("states.php");
 include_once("dxccs.php");
 include_once("wae.php");
+$call_exceptions = unserialize(file_get_contents("db/calls.phpserial"));
 
 $arr_states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
 
@@ -35,6 +36,10 @@ function stats($c) {
     $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).")");
     $r = mysqli_fetch_row($q);
     $wae = $r[0];
+    # add special WAE areas
+    $q = mysqli_query($db, "SELECT count(distinct(`wae`)) from cwops_log where LENGTH(wae) = 2 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).")");
+    $r = mysqli_fetch_row($q);
+    $wae += $r[0];
 
     $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where `mycall`='$c'");
     $r = mysqli_fetch_row($q);
@@ -506,13 +511,13 @@ function parse_adif($adif, $members) {
                     # of the CQ zone in the CQZ field, or a completely invalid
                     # value.
 
-                    $itu = lookup($qsocall, 'itu');
+                    $itu = lookup($qsocall, 'itu', $date);
                     if ($qso['waz'] == 0 or $qso['waz'] > 40 or $qso['waz'] == $itu) {
-                        $qso['waz'] = lookup($qsocall, 'waz');
+                        $qso['waz'] = lookup($qsocall, 'waz', $date);
                     }
                     
                     if ($qso['dxcc'] == 0) {
-                        $qso['dxcc'] = lookup($qsocall, 'adif');
+                        $qso['dxcc'] = lookup($qsocall, 'adif', $date);
                     }
 
                     # as per WAS rules, DC counts as Maryland
@@ -557,10 +562,34 @@ function f2b ($f) {
 
 # look up calls on HamQTH's API
 # Save all data in a local Redis Database to avoid flooding the API
-function lookup ($call, $what) {
+# Also load exceptions from OK1RR's country file.
+function lookup ($call, $what, $date) {
+    global $call_exceptions;
 
     if (!$call) {
         return "";
+    }
+
+    # check if this callsign is in OK1RR's exception list
+
+    if (isset($call_exceptions->$call)) {
+        error_log("Exceptions for $call found (date: $date): ");
+
+        $exc = $call_exceptions->$call;
+
+        # check if the date range fits
+        foreach ($exc as $e) {
+            error_log($e->start." -> ".$e->stop);
+            if ($date >= $e->start and $date <= $e->stop) {
+                if ($what == 'json') {
+                    return json_encode($e);
+                }
+                else {
+                    return $e->$what;
+                }
+                error_log(json_encode($e));
+            }
+        }
     }
 
     $redis = new Redis();
@@ -572,18 +601,18 @@ function lookup ($call, $what) {
         $data = file_get_contents("https://www.hamqth.com/dxcc_json.php?callsign=$call");
     }
 
-    if ($what == 'json') {
-        return $data;
-    }
 
     $o = json_decode($data);
 
     if (!$o) {
         error_log("Could not parse $data for $call.");
-        return "";
+        return "{}";
     }
     else {
         $redis->set("HamQTH".$call, $data);
+        if ($what == 'json') {
+            return $data;
+        }
         return $o->$what;
     }
 
