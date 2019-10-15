@@ -23,12 +23,16 @@ if (array_key_exists("id", $_SESSION)) {
 
     <P>Upload new ADIF:
     <input type="file" id="file" /> <button id='upload' onClick='javascript:upload();'>Upload</button>
-    <input id="cbignore" type="checkbox" name="cbignore" value="1"> Ignore DXCC, CQ-Zone and State values from ADIF (will be taken from the database).
+    <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)
     </p>
 
     <div id="upload_result"></div>
 
     <script>
+	function ol () {
+		check_email();
+	}
+
 
     window.setInterval(keepalife, 300000);
     function keepalife () {
@@ -65,7 +69,7 @@ if (array_key_exists("id", $_SESSION)) {
     }
 
     function show(item) {
-        var items = [ "stats", "edit", "log", "uploads" ];
+        var items = [ "stats", "edit", "log", "uploads", "account" ];
 
         for (var i = 0; i < items.length; i++) {
             console.log(items[i]);
@@ -226,8 +230,46 @@ if (array_key_exists("id", $_SESSION)) {
         request.send();
     }
 
+    function reload_account() {
+        console.log("reload account");
+    }
 
+    function update_account(item) {
+        var value = document.getElementById(item + '_field').value;
+        console.log('update account ' + item + ' => ' + value);
 
+        if (!value) {
+            alert("Value for " + item  + " must not be empty!");
+            return;
+        }
+
+        var request =  new XMLHttpRequest();
+        request.open("POST", '/api?action=update_account', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    alert(request.responseText);
+                }
+            }
+        }
+        request.send(JSON.stringify({"item": item, "value": value}));
+    }
+
+    function check_email () {
+        var f = document.getElementById('email_field');
+        var b = document.getElementById('setemail');
+        // check for email in format .+@.*\..+
+        var r = new RegExp('.+@.+[.].+');
+        if (f.value.match(r)) {
+            f.style.color = '#119911';
+			b.disabled = false;
+        }
+        else {
+            f.style.color = '#ff0000';
+			b.disabled = true;
+        }
+    }
     </script>
 
 <br>
@@ -236,6 +278,7 @@ if (array_key_exists("id", $_SESSION)) {
 <button id='edit' onClick="javascript:show(this.id);">Edit QSOs</button>
 <button id='log' onClick="javascript:show(this.id);">Enter QSOs</button>
 <button id='uploads' onClick="javascript:show(this.id);reload_upload_history();">Show upload history</button>
+<button id='account' onClick="javascript:show(this.id);reload_account();">Account</button>
 
 <br>
 
@@ -267,14 +310,12 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <div id="log_div" style="display:none;">
 <h2>Log contacts manually</h2>
 <p>Here you can easily enter contacts manually, for example to add QSOs with members on DXpeditions. <button id='search' onClick="javascript:clear_form(0);">Clear Form</button></p>
-<!-- form name="enterform" -->
 <table>
 <tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Save</th></tr>
 <?
     editformline("", "", "", "", "", "", "", "", "new");
 ?>
 </table>
-<!-- /form -->
 
 </div>
 <div id="stats_div">
@@ -285,8 +326,25 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <div id="uploads_div" style="display:none;">
 <h2>QSO upload history</h2>
 </div>
+<div id="account_div" style="display:none;">
+
+<h2>Change Account Settings</h2>
+
+<p>Here you can change your password and enter an email address (for account recovery). If you changed your callsign and want to change the account name, please send a mail to Fabian, DJ1YFK <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>.</p>
+
+<table>
+<tr><td>Password:</td><td> <input id='password_field' name='password' type='password' size='15'></td><td><button onClick="javascript:update_account('password');">Set new password</button></td></tr>
+<tr><td>E-Mail:</td><td><input  oninput="check_email();" id='email_field' name='email' type='text' size='15' value="<?=$_SESSION['email'];?>"></td><td><button id="setemail" onClick="javascript:update_account('email');">Save email address</button></td></tr>
+</table>
+
+</div>
 <div id="summary_div" style="display:none;">
 </div>
+
+    <script>
+    ol();
+    </script>
+
 <?
 }
 else {

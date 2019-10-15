@@ -38,7 +38,7 @@ function stats($c) {
     $r = mysqli_fetch_row($q);
     $wae += $r[0];
 
-    $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where waz > 0 and waz < 41 and `mycall`='$c'");
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
@@ -397,6 +397,7 @@ function parse_cam ($csv, $members) {
 		}
         $adif .= " <EOR>\n";
     }
+    file_put_contents("/tmp/adif", $adif);
     return $adif;
 }
 
@@ -440,11 +441,18 @@ function parse_adif($adif, $members, $ign) {
                 $call = $qsocall;
             }
 
+            # in some cases we still have a /, e.g. VP2E/K1XM. If this is the
+            # case, just take the 2nd part and hope it's correct...
+#            if (preg_match('/^(\w{4,4}\/)(\w{4,4})/', $call, $match)) {
+#                $call = $match[2];
+#            }
+
             # Check if there's a "CWO:" specified somewhere, e.g. in the
             # comment field
-            if (preg_match('/CWO:([A-Z0-9]+)/', $q, $match)) {
+            if (preg_match('/CWO:([A-Z0-9\/]+)/', $q, $match)) {
                 $call = $match[1];
             }
+#            error_log($call);
 
             # check if it's a member and then date vs. membership date
             if (array_key_exists($call, $mh)) {
@@ -510,6 +518,8 @@ function parse_adif($adif, $members, $ign) {
                     if ($qso['waz'] == 0 or $qso['waz'] > 40 or $qso['waz'] == $itu) {
                         $qso['waz'] = lookup($qsocall, 'waz', $date);
                     }
+                    # hamqth returns empty value for /mm
+                    if ($qso['waz'] == "") { $qso['waz'] = 0; }
 
                     if ($qso['dxcc'] == 0) {
                         $qso['dxcc'] = lookup($qsocall, 'adif', $date);
@@ -690,6 +700,11 @@ function new_was($qso, $c) {
 # DXCC: New DXCC on this band?
 function new_dxcc($qso, $c) {
     global $db;
+
+    if ($qso['dxcc'] == 0) {
+        return false;
+    }
+
     $q = mysqli_query($db, "SELECT count(*) from cwops_log where mycall='$c' and dxcc=".$qso['dxcc']." and band=".$qso['band']);
     $r = mysqli_fetch_row($q);
     return ($r[0] == 0); 
@@ -711,6 +726,11 @@ function new_wae($qso, $c) {
 # WAZ: New Zone on this band?
 function new_waz($qso, $c) {
     global $db;
+
+    if ($qso['waz'] == 0) {
+        return false;
+    }
+
     $q = mysqli_query($db, "SELECT count(*) from cwops_log where mycall='$c' and waz=".$qso['waz']." and band=".$qso['band']);
     $r = mysqli_fetch_row($q);
     return ($r[0] == 0); 

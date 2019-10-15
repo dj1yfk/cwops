@@ -20,6 +20,12 @@ if (!preg_match('/^[a-z0-9\/]+$/i', $call)) {
     return;
 }
 
+if (!strlen($password)) {
+    echo "Password must not be empty.";
+    echo "<a href='/'>Return to home page</a>";
+    return;
+}
+
 log_in_or_create($call, $password, true);
 
 function log_in_or_create ($call, $password, $recursive) {
@@ -34,6 +40,7 @@ function log_in_or_create ($call, $password, $recursive) {
             header("Location: https://cwops.telegraphy.de/");
             $_SESSION['id'] = $user->id;
             $_SESSION['callsign'] = $user->callsign;
+            $_SESSION['email'] = $user->email;
             echo "Login successful! Forwarding...";
             error_log("successful login of ".$user->callsign);
             return;

@@ -82,6 +82,9 @@
     case 'save':
         save();
         break;
+    case 'update_account':
+        update_account();
+        break;
     }
 
     function upload($ign) {
@@ -326,5 +329,46 @@
     }
 
 
+    function update_account () {
+        global $db;
+
+        $postdata = file_get_contents("php://input");
+
+        $o = json_decode($postdata);
+
+        if (!$o) {
+            echo "Invalid data.";
+            return;
+        }
+
+        switch ($o->item) {
+        case 'password':
+            if (strlen($o->value)) {
+                $value = password_hash($o->value, PASSWORD_DEFAULT);
+            }
+            else {
+                echo "Password must not be empty.";
+                return;
+            }
+            break;
+        case 'email':
+            $value = mysqli_real_escape_string($db, $o->value);
+            $_SESSION['email'] = $value;
+            break;
+        default:
+            echo "Invalid data.";
+            return;
+            break;
+        }
+
+        $q = mysqli_query($db, "update cwops_users set ".$o->item." = '".$value."' where id=".$_SESSION['id']);
+        if ($q) {
+            echo "Updated.";
+        }
+        else {
+            echo "Data base error. Contact administrator if this persists.";
+            error_log(mysqli_error($db));
+        }
+    }
 
 ?>
