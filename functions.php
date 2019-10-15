@@ -312,6 +312,17 @@ function import($adif, $callsign, $ign) {
     $members = get_memberlist();
     $ret .= "Loaded member list with ".count($members)." entries.<br>";
 
+    # detect start date for importing QSOs, based on user's callsign.
+    $startdate = get_joindate($callsign);
+
+    if ($startdate) {
+        $ret .= "CWops join date for $callsign is ".$startdate." <br>";
+        $startdate = preg_replace('/\-/', '', $startdate);
+    }
+    else {
+        $ret .= "<b>Could not identify $callsign as a CWops member. Starting import from 2010-01-01. If you joined CWops later, please only upload logs after your start date!</b><br>";
+    }
+
     # detect data format. it may be ADIF or CSV export from CAM
     # If it is CSV, convert it to ADIF first and then import it
 
@@ -320,7 +331,7 @@ function import($adif, $callsign, $ign) {
         $adif = parse_cam($adif, $members);
     }
 
-    $qsos = parse_adif($adif, $members, $ign);
+    $qsos = parse_adif($adif, $members, $ign, $startdate);
     $ret .= "Parsed ADIF with ".count($qsos)." QSOs with CWops members.<br>";
 
     $qsos = filter_qsos($qsos, $callsign);
@@ -407,7 +418,7 @@ function makeadi ($field, $value) {
 }
 
 # parse ADIF and return member QSOs (matched by date) 
-function parse_adif($adif, $members, $ign) {
+function parse_adif($adif, $members, $ign, $startdate) {
 
     $out = array();
 
@@ -441,24 +452,23 @@ function parse_adif($adif, $members, $ign) {
                 $call = $qsocall;
             }
 
-            # in some cases we still have a /, e.g. VP2E/K1XM. If this is the
-            # case, just take the 2nd part and hope it's correct...
-#            if (preg_match('/^(\w{4,4}\/)(\w{4,4})/', $call, $match)) {
-#                $call = $match[2];
-#            }
-
             # Check if there's a "CWO:" specified somewhere, e.g. in the
             # comment field
             if (preg_match('/CWO:([A-Z0-9\/]+)/', $q, $match)) {
                 $call = $match[1];
             }
-#            error_log($call);
 
             # check if it's a member and then date vs. membership date
             if (array_key_exists($call, $mh)) {
                 preg_match('/<QSO_DATE:\d+(:\w)?()>([0-9]+)/', $q, $match);
                 if ($match[3] && $match[3] >= $mh[$call]['joined'] && $match[3] <= $mh[$call]['left']) {
                     $date = $match[3];
+
+                    # we have a start date. if the QSO is before this date,
+                    # ignore it.
+                    if ($startdate && $date <= $startdate) {
+                        continue;
+                    }
 
                     # Valid QSO. Now find out band and optionally state, wae,
                     # waz and dxcc.
@@ -922,16 +932,17 @@ function validate ($type, $value) {
 function score_table() {
     global $db;
 
-    if (!in_array($_SESSION['id'], array(18, 13, 22, 15))) {
-        echo "Only for administrators.";
-        return;
-    }
+#   if (!in_array($_SESSION['id'], array(18, 13, 22, 15))) {
+#       echo "Currently only for administrators.";
+#       return;
+#   }
 
+    echo "<div class='container'>";
     # aca / cma combined table
-    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
-    echo "<table border=1><tr><th colspan=2>".strtoupper($i)."</th></tr>\n";
+    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc;");
+    echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
-        echo "<tr><td>$r[0]</td><td>$r[1]</td></tr>\n";
+        echo "<tr><td>$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</tr>\n";
     }
     echo "</table>";
 
@@ -939,15 +950,36 @@ function score_table() {
 
     foreach ($items as $i) {
         $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
-        echo "<table border=1><tr><th colspan=2>".strtoupper($i)."</th></tr>\n";
+        echo "<table><tr><th>Call</th><th>".strtoupper($i)."</th></tr>\n";
         while ($r = mysqli_fetch_row($q)) {
-            echo "<tr><td>$r[0]</td><td>$r[1]</td></tr>\n";
+            echo "<tr><td>$r[0]</td><td class='score'>$r[1]</td></tr>\n";
         }
         echo "</table>";
     }
+    echo "</div>";
+}
 
 
+function get_joindate($callsign) {
+    global $db;
 
+    $q = mysqli_query($db, "SELECT nr from cwops_members where callsign='$callsign'");
+    $r = mysqli_fetch_row($q);
+    if ($r[0]) {
+        # find earliest entry in member list with this nr (may be a previous call)
+
+        $q = mysqli_query($db, "SELECT min(joined) from cwops_members where nr=".$r[0]);
+        $r = mysqli_fetch_row($q);
+        if ($r[0]) {
+            return $r[0];
+        }
+        else {
+            return 0;
+        }
+    }
+    else {
+        return 0;
+    }
 
 }
 

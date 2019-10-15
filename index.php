@@ -5,7 +5,6 @@ include('functions.php');
 <!DOCTYPE html>
 <html>
 		<head>
-				<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
 				<link rel="stylesheet" type="text/css" href="/style.css">
 				<title>CWops Award Tools</title>
 				<link rel="icon" href="/favicon.ico">

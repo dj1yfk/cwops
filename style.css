@@ -19,6 +19,7 @@ table {
 }
 th {
 		background-color: #aabbff;
+        font-size: 12px;
 }
 td {
 		padding-right: 6px;
@@ -33,15 +34,14 @@ code {
 .oldspot { background-color: #eeeeee; }
 .right { text-align:right; }
 
-.snr40 { color: #000000; }
-.snr30 { color: #444444; }
-.snr20 { color: #888888; }
-.snr10 { color: #aaaaaa; }
-.snr00 { color: #cccccc; }
+.score {
+    text-align: right;
+}
 
-.snr40hc { font-weight: bold; color: #000000; }
-.snr30hc { color: #111111; }
-.snr20hc { color: #222222; }
-.snr10hc { color: #333333; }
-.snr00hc { color: #444444; }
+.container {
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto auto;
+    grid-gap: 5px;
+}
+
 

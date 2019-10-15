@@ -15,13 +15,13 @@ $password = $_POST['password'];
 # check validity 
 
 if (!preg_match('/^[a-z0-9\/]+$/i', $call)) {
-    echo "Callsign can only contain A-Z, 0-9 and /.";
+    echo "Callsign can only contain A-Z, 0-9 and /.<br>";
     echo "<a href='/'>Return to home page</a>";
     return;
 }
 
 if (!strlen($password)) {
-    echo "Password must not be empty.";
+    echo "Password must not be empty.<br>";
     echo "<a href='/'>Return to home page</a>";
     return;
 }
@@ -46,8 +46,10 @@ function log_in_or_create ($call, $password, $recursive) {
             return;
         }
         else {
-            echo "Password incorrect. Try again.";
-            echo "<a href='/'>Return to home page</a>";
+?>
+            Password incorrect. <br>
+            <a href='/'>Return to home page</a><br>
+<?
             return;
         }
 
