@@ -2,15 +2,37 @@
 session_start();
 include_once('db.php');
 
-# Logout
-if (array_key_exists('f', $_GET) && $_GET['f'] == 'logout') {
+if (array_key_exists('f', $_GET)) {
+    switch ($_GET['f']) {
+    case 'logout':
+        logout();
+        break;
+    case 'lostpassword':
+        lostpassword();
+        break;
+    case 'recover':
+        recover();
+        break;
+    default:
+        echo "Invalid";
+        return;
+    }
+}
+else {
+    login();
+}
+
+return;
+
+function logout () {
     session_destroy();
     header("Location: https://cwops.telegraphy.de/");
     return;
 }
 
-# Lost password, send mail (if possible)
-if (array_key_exists('f', $_GET) && $_GET['f'] == 'lostpassword') {
+function lostpassword () {
+    global $db;
+
     $call = $_POST['recover'];
 
     if (!valid_call($call)) {
@@ -50,10 +72,10 @@ If you didn't request this mail yourself, please disregard this message.
         echo "<a href='/'>Return to home page</a>";
     }
     return;
-}
+} # lostpassword
 
-# recovery / instant login link
-if (array_key_exists('f', $_GET) && $_GET['f'] == 'recover') {
+function recover () {
+    global $db;
     $call = $_GET['u'];
     $hash = $_GET['h'];
 
@@ -81,24 +103,25 @@ if (array_key_exists('f', $_GET) && $_GET['f'] == 'recover') {
     return;
 }
 
-$call = strtoupper($_POST['callsign']);
-$password = $_POST['password'];
+function login () {
+    $call = strtoupper($_POST['callsign']);
+    $password = $_POST['password'];
 
-# check validity 
+    # check validity 
+    if (!valid_call($call)) {
+        echo "Callsign can only contain A-Z, 0-9 and /.<br>";
+        echo "<a href='/'>Return to home page</a>";
+        return;
+    }
 
-if (!valid_call($call)) {
-    echo "Callsign can only contain A-Z, 0-9 and /.<br>";
-    echo "<a href='/'>Return to home page</a>";
-    return;
+    if (!strlen($password)) {
+        echo "Password must not be empty.<br>";
+        echo "<a href='/'>Return to home page</a>";
+        return;
+    }
+    
+    log_in_or_create($call, $password, true);
 }
-
-if (!strlen($password)) {
-    echo "Password must not be empty.<br>";
-    echo "<a href='/'>Return to home page</a>";
-    return;
-}
-
-log_in_or_create($call, $password, true);
 
 function log_in_or_create ($call, $password, $recursive) {
     global $db;
