@@ -4,3 +4,5 @@ RewriteCond %{HTTPS} off
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
 RewriteRule ^logout(/)?$ /login.php?f=logout [L]
+RewriteRule ^lostpassword(/)?$ /login.php?f=lostpassword [L]
+RewriteRule ^recovery/([a-z0-9]+)/([a-zA-Z0-9]+) /login.php?f=recover&h=$1&u=$2 [L]
