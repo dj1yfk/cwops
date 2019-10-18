@@ -12,7 +12,7 @@ include('functions.php');
 		</head>
 		<body>
 				<h1>CWops Award Tools</h1>
-				<p>This server provides services for members of <a href="https://cwops.org/">CWops</a>. It's maintained by <a href="https://fkurz.net">Fabian, DJ1YFK</a> (CWops #1566) and is not (yet!) an official web site of the club.</p> <hr>
+				<p>This server provides services for members of <a href="https://cwops.org/">CWops</a>. <a href="/help">Help and Documentation</a> - <a href="/intro">Introduction Video</a></p>
 
 <h2>ACA, CMA, WAS, WAE and WAZ tracking</h2>
 <?
@@ -20,7 +20,7 @@ if (array_key_exists("id", $_SESSION)) {
 ?>
     <p>Logged in as <?=$_SESSION['callsign'];?>. <a href="/logout">Log out</a></p>
 
-    <P>Upload new ADIF:
+    <P>Upload new ADIF/CAM data:
     <input type="file" id="file" /> <button id='upload' onClick='javascript:upload();'>Upload</button>
     <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)
     </p>
@@ -360,7 +360,7 @@ else {
 <p>When signing up, you accept the <a href="/privacy">privacy policy</a> of this site.</p>
 
 
-<p>Lost your password? Get in touch with <a href="mailto:fabian@fkurz.net">Fabian, DJ1YFK</a> to reset your account.</p>
+<p>Lost your password and no email address in account profile? Get in touch with <a href="mailto:help@cwops.telegraphy.de">Fabian, DJ1YFK</a> to reset your account.</p>
 
 <?
 }
