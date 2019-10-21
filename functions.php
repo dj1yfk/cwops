@@ -547,6 +547,11 @@ function parse_adif($adif, $members, $ign, $startdate) {
                         $qso['was'] = "";
                     }
 
+                    # finally, some hard-coded exceptions:
+                    if ($qso['call'] == "K7SV") {
+                        $qso['waz'] = 5;
+                    }
+
                     array_push($out, $qso);
 
                 }

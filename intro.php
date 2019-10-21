@@ -11,7 +11,7 @@
 
         <p><a href="/">Back to the main website</a></p>
 
-        <video onloadstart="this.volume=0.1" controls src="media/cat.mp4">
+        <video controls src="media/cat.mp4">
 
 </body>
 </html>

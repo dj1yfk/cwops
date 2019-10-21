@@ -13,8 +13,17 @@
 
 <p>This is a list of questions that users asked or <em>might</em> ask. It's a work in progress and it will be extended over time.</p>
 
+<h2>Where do I find the rules for the awards?</h2>
+<p>On the <a href="https://cwops.org/contact-us/awards/">CWops website</a>.</p>
+
+<h2>How to I report my scores?</h2>
+<p>Scores are automatically reported to the awards manager. There's nothing you need to do!</p>
+
 <h2>Can I import my contacts from CAM?</h2>
 <p>Yes, just upload the "yourcall.data" file from CAM instead of an ADIF file.</p>
+
+<h2>How are different callsigns handled?</h2>
+<p>All logs you upload are credited to the account you are logged in with, regardless of the callsign you made the contacts with. This means you can upload your ADIF files from portable, holiday or DXpedition operations just like those from your home station. They are all merged automatically.</p>
 
 <h2>Uploading the logs is very slow!</h2>
 <p>Depending on the current load on the server and your internet connection, uploading and processing 1000 QSOs takes about one minute. It is recommended to split up your log into smaller chunks if it's very large. Most logging programs will allow you to export ADIF logs by date, so it would be a reasonable idea to upload logs year by year.</p>
@@ -33,7 +42,7 @@
 <li>Bud, AA3B (beta testing)</li>
 <li>Bill, W0TG (beta testing)</li>
 <li>Bob, N7WY (membership roster)</li>
-<li>Martin, OK1RR (Country resolution files)</li>
+<li>Martin, OK1RR (Country resolution files, testing)</li>
 <li>Petr, OK2CQR/OK7AN (HamQTH DXCC lookup API)</li>
 <li>Adam, SQ9S (beta testing)</li>
 <li>Giu, IT9VDQ (beta testing)</li>
