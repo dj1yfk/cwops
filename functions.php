@@ -75,7 +75,7 @@ function stats($c) {
                 if (request.readyState == done && request.status == ok) {
                         if (request.responseText) {
                                 var s = document.getElementById(d);
-								s.innerHTML = request.responseText;
+                                s.innerHTML = request.responseText;
                         }
                 };
         }
@@ -323,16 +323,21 @@ function import($adif, $callsign, $ign) {
         $ret .= "<b>Could not identify $callsign as a CWops member. Starting import from 2010-01-01. If you joined CWops later, please only upload logs after your start date!</b><br>";
     }
 
-    # detect data format. it may be ADIF or CSV export from CAM
-    # If it is CSV, convert it to ADIF first and then import it
+    # detect data format. it may be ADIF, CSV export from CAM
+    # or Cabrillo. If it is Cabrillo or CSV, convert it to ADIF
+    # first and then import it
 
-    if (!(strstr($adif, "<eoh>") or strstr($adif, "<EOH>"))) {
+    if (strstr($adif, "START-OF-LOG:")) {
+        $ret .= "Data format looks like Cabrillo. Trying to convert...<br>";
+        $adif = parse_cam_cbr($adif, $members, "CBR");
+    }
+    else if (!(strstr($adif, "<eoh>") or strstr($adif, "<EOH>"))) { # no end of ADIF header
         $ret .= "Data format looks like CAM exported CSV (not ADIF). Trying to convert...<br>";
-        $adif = parse_cam($adif, $members);
+        $adif = parse_cam_cbr($adif, $members, "CAM");
     }
 
     $qsos = parse_adif($adif, $members, $ign, $startdate);
-    $ret .= "Parsed ADIF with ".count($qsos)." QSOs with CWops members.<br>";
+    $ret .= "Parsed log file with ".count($qsos)." QSOs with CWops members.<br>";
 
     $qsos = filter_qsos($qsos, $callsign);
     $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
@@ -370,42 +375,63 @@ function get_memberlist() {
     return $members;
 }
 
-# parse CAM CSV file format and make ADIF
-# 20100101,1111,N3JT,40M,CW,K,VA,JIM,1
+# parse CAM CSV file format or Cabrillo log and make ADIF
+# CAM: 20100101,1111,N3JT,40M,CW,K,VA,JIM,1
+# CBR: QSO:  3500 CW 2019-10-03 0721 DA0HSC        599 M      DL5AXX        599 GI
 
-function parse_cam ($csv, $members) {
+function parse_cam_cbr ($data, $members, $type) {
 
     # make hash table for quicker member lookup
-    $mh = array();		# call -> info
-	$mhnr = array();	# nr   -> call
+    $mh = array();        # call -> info
+    $mhnr = array();    # nr   -> call
     foreach ($members as $m) {
         $mh[$m["callsign"]] = $m;
-		$mhnr[$m["nr"]] = $m["callsign"];
+        $mhnr[$m["nr"]] = $m["callsign"];
     }
 
-    $csv = strtoupper($csv);
-    $csv = preg_replace('/\r/', '', $csv);
-    $qsos = explode("\n", $csv);
+    $data = strtoupper($data);
+    $data = preg_replace('/\r/', '', $data);
+    $qsos = explode("\n", $data);
 
     $adif = "header\n<EOH>\n";
     foreach ($qsos as $q) {
-        $a = explode(",", $q);
 
-        if (count($a) != 9) {
-            continue;
+        if ($type == "CAM") {
+            $a = explode(",", $q);
+
+            if (count($a) != 9) {
+                continue;
+            }
+
+            $qso_date = $a[0];
+            $call = $a[2];
+            $band = $a[3];
+            $state = $a[6];
+        }
+        if ($type == "CBR") {
+            $a = preg_split('/\s+/', $q); 
+
+            if ($a[0] != "QSO:") {
+                continue;
+            }
+
+            $qso_date = preg_replace('/\-/', '', $a[3]);
+            $call = $a[8];
+            $band = f2b($a[1]/1000)."m";
+            $state = "--";
         }
 
-        $adif .= makeadi('qso_date', $a[0]); 
-        $adif .= makeadi('call', $a[2]); 
-        $adif .= makeadi('band', $a[3]); 
-        $adif .= makeadi('state', $a[6]); 
+        $adif .= makeadi('qso_date', $qso_date); 
+        $adif .= makeadi('call', $call); 
+        $adif .= makeadi('band', $band); 
+        $adif .= makeadi('state', $state); 
         $adif .= makeadi('mode', "CW"); 
 
-		# is this a member call? If not, but the CWops nr is valid,
-		# add the member's call as a remark
-		if (!array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
-			$adif .=  "CWO:".$mhnr[$a[8]]." ";
-		}
+        # CAM: Is this a member call? If not, but the CWops nr is valid,
+        # add the member's call as a remark
+        if (!array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
+            $adif .=  "CWO:".$mhnr[$a[8]]." ";
+        }
         $adif .= " <EOR>\n";
     }
     file_put_contents("/tmp/adif", $adif);
@@ -542,7 +568,7 @@ function parse_adif($adif, $members, $ign, $startdate) {
 
                     # remove state for cases where it's not applicable, e.g.
                     # KP2/W1XYZ
-                    #                   USA                   KL7					KH6
+                    #                   USA                   KL7                    KH6
                     if ($qso['dxcc'] != 291 && $qso['dxcc'] != 6 && $qso['dxcc'] != 110) {
                         $qso['was'] = "";
                     }
@@ -578,6 +604,8 @@ function f2b ($f) {
     elseif ($f < 75000) { return "4"; }
     elseif ($f < 148000) { return "2"; }
     elseif ($f < 440000) { return "0.7"; }
+
+    return 0;
 }
 
 # look up calls on HamQTH's API
@@ -937,17 +965,14 @@ function validate ($type, $value) {
 function score_table() {
     global $db;
 
-#   if (!in_array($_SESSION['id'], array(18, 13, 22, 15))) {
-#       echo "Currently only for administrators.";
-#       return;
-#   }
-
     echo "<div class='container'>";
     # aca / cma combined table
     $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc;");
     echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
-        echo "<tr><td>$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</tr>\n";
+        if ($r[0] != "TEST") {
+            echo "<tr><td>$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</tr>\n";
+        }
     }
     echo "</table>";
 
