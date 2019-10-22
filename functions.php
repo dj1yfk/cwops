@@ -986,7 +986,9 @@ function score_table() {
         $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
         echo "<table><tr><th>Call</th><th>".strtoupper($i)."</th></tr>\n";
         while ($r = mysqli_fetch_row($q)) {
-            echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
+            if ($r[0] != "TEST") {
+                echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
+            }
         }
         echo "</table>";
     }
