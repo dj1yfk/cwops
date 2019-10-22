@@ -90,12 +90,18 @@ of calculating points for awards and to create fully anonymized statistics.</str
         <strong>Data storage duration:</strong> 10 minutes after the last
         activity on the site.<br>
         <strong>Visibility:</strong> Site administrator only.</li>
-    <li><strong>Uploading ADIF logs:</strong> The uploaded data will be filtered
+    <li><strong>Uploading ADIF/CAM/CBR logs:</strong> The uploaded data will be filtered
         for relevant data, and for each record uploaded, at maximum the callsign,
         date, frequency/band, DXCC, zone, state and WAE will be saved to the database.
         Additionally a summary of the upload will be saved for later review by the user.<br>
         <strong>Data storage duration:</strong> Until deleted by user or deletion of account.<br>
         <strong>Visibility:</strong> Only to the user and site administrator.</li>
+    <li><strong>Award statistics:</strong> The statistics generated from the user uploads are saved in a separate database table.
+        They consist of the user's account name, and their scores for the various awards (5 numbers for ACA, CMA, WAS, WAZ and WAE).
+        <br>
+        <strong>Data storage duration:</strong> Until deleted by user or deletion of account.<br>
+        <strong>Visibility:</strong> Public.</li>
+
     <li><strong>Any other data:</strong> Any other data not mentioned is always
         handled with the utmost care and by the priciple of minimizing
         data.</li>

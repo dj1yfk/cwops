@@ -20,7 +20,7 @@ if (array_key_exists("id", $_SESSION)) {
 ?>
     <p>Logged in as <?=$_SESSION['callsign'];?>. <a href="/logout">Log out</a></p>
 
-    <P>Upload new ADIF/CAM data:
+    <P>Upload new ADIF, CAM or Cabrillo log:
     <input type="file" id="file" /> <button id='upload' onClick='javascript:upload();'>Upload</button>
     <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)
     </p>
