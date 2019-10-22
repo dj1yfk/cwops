@@ -85,6 +85,9 @@
     case 'update_account':
         update_account();
         break;
+    case 'award_pdf':
+        award_pdf();
+        break;
     }
 
     function upload($ign) {
@@ -370,5 +373,16 @@
             error_log(mysqli_error($db));
         }
     }
+
+    function award_pdf () {
+        $callsign = validate_get('callsign');
+        $type = validate_get('type');
+        header("Content-type: application/pdf");
+        header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
+        echo create_award ($callsign, $type, 1000, "2019-01-01");
+    }
+
+
+
 
 ?>

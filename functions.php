@@ -923,6 +923,7 @@ function validate ($type, $value) {
     case 'callsign':
     case 'hiscall':
     case 'mycall':
+    case 'type':
         $value = strtoupper($value);
         if (preg_match('/^[A-Z0-9\/]+$/', $value)) {
             return $value;
@@ -1037,10 +1038,14 @@ function get_joindate($callsign) {
 
 }
 
-#import(file_get_contents("dj1yfk.adi"), "DJ1YFK");
-
-#$time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-#echo "time: $time\n";
+function create_award ($callsign, $type, $score, $date) {
+    $type = strtolower($type);
+    $fdf = sprintf(file_get_contents("pdf/cwops-$type.fdf"), $callsign, date("Y"), 1234, $date, $score);
+    $filename = "/tmp/award-".$_SESSION['id']."-$type";
+    file_put_contents("$filename.fdf", $fdf);
+    system("pdftk pdf/cwops-$type.pdf fill_form $filename.fdf output $filename.pdf");
+    return file_get_contents("$filename.pdf");
+}
 
 
 ?>
