@@ -320,7 +320,7 @@ function import($adif, $callsign, $ign) {
         $startdate = preg_replace('/\-/', '', $startdate);
     }
     else {
-        $ret .= "<b>Could not identify $callsign as a CWops member. Starting import from 2010-01-01. If you joined CWops later, please only upload logs after your start date!</b><br>";
+        $ret .= "<b>Could not identify $callsign as a CWops member (possibly because you recently joined and the member list on this site is not yet updated). Starting import from 2010-01-01. If you joined CWops later, please only upload logs after your start date!</b><br>";
     }
 
     # detect data format. it may be ADIF, CSV export from CAM
