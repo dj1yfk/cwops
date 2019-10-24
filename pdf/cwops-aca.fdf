@@ -1,0 +1,36 @@
+%%FDF-1.2
+%%‚„œ”
+1 0 obj 
+<<
+/FDF 
+<<
+/Fields [
+<<
+/T (Call)
+/V (%s)
+>> 
+<<
+/T (Year)
+/V (%s)
+>> 
+<<
+/T (CWops ID)
+/V (%s)
+>> 
+<<
+/T (Issue Date)
+/V (%s)
+>> 
+<<
+/T (ACA)
+/V (%s)
+>>]
+>>
+>>
+endobj 
+trailer
+
+<<
+/Root 1 0 R
+>>
+%%%%EOF

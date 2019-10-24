@@ -45,13 +45,13 @@ function stats($c) {
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
 <table>
-<tr><th>Award</th><th>Score</th><th>Details</th></tr>
-<tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 0);?></td></tr>
-<tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 0);?></td></tr>
-<tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 1);?></td></tr>
-<tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 1);?></td></tr>
-<tr><td>WAE</td><td><?=$wae?></td><td><?=award_details('wae', 1);?></td></tr>
-<tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 1);?></td></tr>
+<tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
+<tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 0);?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
+<tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 0);?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
+<tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 1);?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
+<tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 1);?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
+<tr><td>WAE</td><td><?=$wae?></td><td><?=award_details('wae', 1);?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
+<tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 1);?></td><td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
 </table>
 
 <br>
@@ -923,9 +923,17 @@ function validate ($type, $value) {
     case 'callsign':
     case 'hiscall':
     case 'mycall':
-    case 'type':
         $value = strtoupper($value);
         if (preg_match('/^[A-Z0-9\/]+$/', $value)) {
+            return $value;
+        }
+        else {
+            return "";
+        }
+        break;
+    case 'type':
+        $value = strtoupper($value);
+        if (in_array($value, array("ACA", "CMA", "WAZ", "WAS", "WAE", "DXCC"))) {
             return $value;
         }
         else {
@@ -1038,10 +1046,34 @@ function get_joindate($callsign) {
 
 }
 
-function create_award ($callsign, $type, $score, $date) {
+function create_award ($callsign, $uid, $type, $score, $date) {
+    global $db;
+
+    error_log("create_award: $callsign, $uid, $type, $score, $date");
+
+    # validated in api.php
+    if ($type == "") {
+        echo "Invalid type.";
+    }
+
     $type = strtolower($type);
-    $fdf = sprintf(file_get_contents("pdf/cwops-$type.fdf"), $callsign, date("Y"), 1234, $date, $score);
-    $filename = "/tmp/award-".$_SESSION['id']."-$type";
+
+    # get CWops number
+    $q = mysqli_query($db, "select nr from cwops_members where `callsign`='$callsign'");
+    $nr = 0;
+    if ($r = mysqli_fetch_row($q)) {
+        $nr = $r[0];
+    }
+
+    $template = file_get_contents("pdf/cwops-$type.fdf");
+
+    if ($type == "aca") {
+        $fdf = sprintf($template, $callsign, date("Y"), $nr, $date, $score);
+    }
+    else {
+        $fdf = sprintf($template, $callsign, $nr, $date, $score);
+    }
+    $filename = "/tmp/award-$uid-$type";
     file_put_contents("$filename.fdf", $fdf);
     system("pdftk pdf/cwops-$type.pdf fill_form $filename.fdf output $filename.pdf");
     return file_get_contents("$filename.pdf");

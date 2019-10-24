@@ -375,11 +375,26 @@
     }
 
     function award_pdf () {
-        $callsign = validate_get('callsign');
         $type = validate_get('type');
-        header("Content-type: application/pdf");
-        header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
-        echo create_award ($callsign, $type, 1000, "2019-01-01");
+        $callsign = $_SESSION['callsign'];
+
+        if ($type && $callsign) {
+
+            # query score...
+            global $db;
+            $q = mysqli_query($db, "select $type from cwops_scores where uid=".$_SESSION['id']);
+            if ($r = mysqli_fetch_row($q)) {
+                $score = $r[0];
+            }
+
+
+            header("Content-type: application/pdf");
+            header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
+            echo create_award ($callsign, $_SESSION['id'], $type, $score, date("Y-m-d"));
+        }
+        else {
+            echo "wrong type or callsign";
+        }
     }
 
 
