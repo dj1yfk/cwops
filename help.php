@@ -35,6 +35,9 @@
 <p>There's a checkbox on the log upload form saying "Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)". If this is checked, the application will try to resolve DXCCs, CQ zones (WAZ) and states by means of OK1RR's country files and the CWops member database. If it's not checked, it will blindly accept any values that your logger wrote into the ADIF file. From experience, the quality of exported data from many loggers isn't very good. More often than not, CQ and ITU zones are swapped, or some more exotic DXCC prefixes are not recognized as such.</p>
 <p>Therefore the recommendation (and default) is to keep this box checked.</p>
 
+<h2>Can I upload multiple files at once?</h2>
+<p>Yes, in the file open dialog, simply select more than one file by clicking on them while keeping the Ctrl key pressed.</p>
+
 <h2>Thanks</h2>
 <p>Thanks to the following individuals for their help and contributions during the beta testing phase:</p>
 <ul>

@@ -91,16 +91,20 @@
     }
 
     function upload($ign) {
-        if (isset($_FILES['uploaded_file'])) {
-            $filename_original = $_FILES['uploaded_file']['name'];
-            $filename_local    = "/tmp/".md5(time() . $filename_original . rand(1,999));
-            error_log("Upload  $filename_original to  $filename_local");
-            error_log(print_r($_FILES, TRUE));
-            if (move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $filename_local)) {
-                error_log("move ok. ign = $ign");
-                echo import(file_get_contents($filename_local), $_SESSION['callsign'], $ign);
+        $ret = "";
+        foreach ($_FILES["uploaded_files"]["error"] as $key => $error) {
+            if ($error == UPLOAD_ERR_OK) {
+                $filename_original = $_FILES['uploaded_files']['name'][$key];
+                $filename_local    = "/tmp/".md5(time() . $filename_original . rand(1,999));
+
+                error_log("Upload  $filename_original to  $filename_local");
+                if (move_uploaded_file($_FILES['uploaded_files']['tmp_name'][$key], $filename_local)) {
+                    error_log("move ok. ign = $ign");
+                    $ret .= import($filename_original, file_get_contents($filename_local), $_SESSION['callsign'], $ign);
+                }
             }
         }
+        echo $ret;
     }
 
     function save() {

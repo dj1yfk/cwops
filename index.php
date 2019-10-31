@@ -21,7 +21,7 @@ if (array_key_exists("id", $_SESSION)) {
     <p>Logged in as <?=$_SESSION['callsign'];?>. <a href="/logout">Log out</a></p>
 
     <P>Upload new ADIF, CAM or Cabrillo log:
-    <input type="file" id="file" /> <button id='upload' onClick='javascript:upload();'>Upload</button>
+    <input type="file" id="file" multiple /> <button id='upload' onClick='javascript:upload();'>Upload</button>
     <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)
     </p>
 
@@ -47,7 +47,11 @@ if (array_key_exists("id", $_SESSION)) {
         var f = document.getElementById('file');
         var file = f.files[0];
         var data = new FormData();
-        data.append("uploaded_file", file);
+
+        for (var x = 0; x < f.files.length; x++) {
+            data.append("uploaded_files[]", f.files[x]);
+        }
+
         var request =  new XMLHttpRequest();
         request.open("POST", '/api?action=upload&ign=' + (ign ? '1' : '0'), true);
         request.onreadystatechange = function() {

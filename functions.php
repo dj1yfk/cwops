@@ -305,10 +305,10 @@ function wae($c, $b) {
 
 # If ign is set, ignore DXCC, WAZ and State info from the uploaded log
 
-function import($adif, $callsign, $ign) {
+function import($filename, $adif, $callsign, $ign) {
     global $db;
 
-    $ret = "Starting import for $callsign...<br>";
+    $ret = "<br>Starting import ($filename) for $callsign...<br>";
     $members = get_memberlist();
     $ret .= "Loaded member list with ".count($members)." entries.<br>";
 
@@ -342,9 +342,11 @@ function import($adif, $callsign, $ign) {
     $qsos = filter_qsos($qsos, $callsign);
     $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
 
-    $ret .= "Full log of the import below. <a href='#' onClick='javascript:document.getElementById(\"import_log\").style.display = \"none\";'>Click here to hide</a>";
+    $nr = rand(0,10000);
 
-    $ret .= "<pre id='import_log'>";
+    $ret .= "Full log of the import below. <a href='#' onClick='javascript:document.getElementById(\"import_log$nr\").style.display = \"none\";'>Click here to hide</a>";
+
+    $ret .= "<pre id='import_log$nr'>";
     $import_log = "";
     foreach ($qsos as $q) {
         $import_log .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
