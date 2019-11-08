@@ -442,7 +442,7 @@ function parse_cam_cbr ($data, $members, $type) {
 
         # CAM: Is this a member call? If not, but the CWops nr is valid,
         # add the member's call as a remark
-        if ($ty0e == "CAM" and !array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
+        if ($type == "CAM" and !array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
             $adif .=  "CWO:".$mhnr[$a[8]]." ";
         }
         $adif .= " <EOR>\n";
