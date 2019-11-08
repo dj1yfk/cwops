@@ -418,7 +418,18 @@ function parse_cam_cbr ($data, $members, $type) {
             }
 
             $qso_date = preg_replace('/\-/', '', $a[3]);
+            # find the call. most of the time it's the 9th field...
             $call = $a[8];
+
+            # if not, search after the 7th field
+            $i = 6;
+            while (!is_call($call)) {
+                $call = $a[$i++];
+                if ($i > count($a)) {
+                    break;
+                }
+            }
+
             $band = f2b($a[1]/1000)."m";
             $state = "--";
         }
@@ -431,7 +442,7 @@ function parse_cam_cbr ($data, $members, $type) {
 
         # CAM: Is this a member call? If not, but the CWops nr is valid,
         # add the member's call as a remark
-        if (!array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
+        if ($ty0e == "CAM" and !array_key_exists($a[2], $mh) and array_key_exists($a[8], $mhnr)) {
             $adif .=  "CWO:".$mhnr[$a[8]]." ";
         }
         $adif .= " <EOR>\n";
@@ -986,7 +997,7 @@ function score_table() {
     echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
         if ($r[0] != "TEST") {
-            echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</tr>\n";
+            echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
         }
     }
     echo "</table>";
@@ -1020,10 +1031,25 @@ function score_table() {
     }
 </script>
 <?
-
-
 }
 
+function score_table_by_call() {
+    global $db;
+
+    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma, cwops_scores.dxcc as dxcc, cwops_scores.was as was, cwops_scores.wae as wae, cwops_scores.waz as waz, cwops_scores.updated as upd from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by callsign;");
+    echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th><th>DXCC</th><th>WAS</th><th>WAE</th><th>WAZ</th><th>Updated</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        if ($r[0] != "TEST") {
+            echo "<tr>";
+            echo "<td>".$r[0]."</td>";
+            for ($i = 1; $i <= 7; $i++) {
+                echo "<td class='score'>".$r[$i]."</td>";
+            }
+            echo "</tr>\n";
+        }
+    }
+    echo "</table>";
+}
 
 function get_joindate($callsign) {
     global $db;
@@ -1079,6 +1105,22 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     file_put_contents("$filename.fdf", $fdf);
     system("pdftk pdf/cwops-$type.pdf fill_form $filename.fdf output $filename.pdf");
     return file_get_contents("$filename.pdf");
+}
+
+function is_call ($c) {
+    $ret = false;
+
+    if (strpos($c, '/') !== false) {
+        $split = explode('/', $c);
+        foreach ($split as $s) {
+            $ret |= is_call($s);
+        }
+    }
+    else {
+        if (preg_match('/^[A-Z]+(\d+)[A-Z]+/',  $c)) { $ret = true; }
+        if (preg_match('/^\d[A-Z]+(\d+)[A-Z]+/', $c)) { $ret = true; }
+    }
+    return $ret;
 }
 
 
