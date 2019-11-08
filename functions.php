@@ -666,6 +666,7 @@ function lookup ($call, $what, $date) {
         $data = file_get_contents("https://www.hamqth.com/dxcc_json.php?callsign=$call");
     }
 
+    $data = preg_replace("/\"Artificial Aerial\"/", "", $data); # bug in HamQTH lookup interface, unescaped quotes
 
     $o = json_decode($data);
 
