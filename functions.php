@@ -271,7 +271,7 @@ function wae($c, $b) {
     }
     $ret .="</h2>";
 
-    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc in (".implode(',', $wae_adif).") and wae='' $band group by `dxcc`");
+    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc in (".implode(',', $wae_adif).") and wae='' $band group by `dxcc` order by hiscall asc");
     if(!$q) {
         echo mysqli_error($db);
     }
