@@ -112,6 +112,24 @@ if (array_key_exists("id", $_SESSION)) {
         request.send();
     }
 
+    function del (id) {
+        // disable buttons to avoid further editing after deleting
+        document.getElementById('save' + id).disabled = true;
+        document.getElementById('del' + id).disabled = true;
+
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=del&nr=' + id, true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    alert(request.responseText);
+                }
+            }
+        }
+        request.send();
+    }
+
     function save (id) {
         //try {
         var items = ['hiscall', 'nr', 'date', 'band', 'dxcc', 'waz', 'was', 'wae'];
@@ -314,7 +332,7 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <h2>Log contacts manually</h2>
 <p>Here you can easily enter contacts manually, for example to add QSOs with members on DXpeditions. <button id='search' onClick="javascript:clear_form(0);">Clear Form</button></p>
 <table>
-<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Save</th></tr>
+<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Save</th><th>Delete</th></tr>
 <?
     editformline("", "", "", "", "", "", "", "", "new");
 ?>

@@ -85,6 +85,10 @@
     case 'save':
         save();
         break;
+    case 'del':
+        $id = validate_get('nr');
+        del($id);
+        break;
     case 'update_account':
         update_account();
         break;
@@ -108,6 +112,18 @@
             }
         }
         echo $ret;
+    }
+
+    function del ($nr) {
+        global $db;
+        $q = mysqli_query($db, "DELETE from cwops_log where mycall='".$_SESSION['callsign']."' and id=$nr");
+        if ($q) {
+            echo "OK";
+        }
+        else {
+            echo "An error occured. Maybe the QSO was deleted in the meantime or you tried to delete a QSO from a different user.";
+            error_log("del: ".mysqli_error($q));
+        }
     }
 
     function save() {
@@ -284,7 +300,7 @@
 
         $count = 0;
 
-        echo "<h2>Search results</h2><table><tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Submit</th></tr>\n";
+        echo "<h2>Search results</h2><table><tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Submit</th><th>Delete</th></tr>\n";
         while ($r = mysqli_fetch_array($q, MYSQLI_ASSOC)) {
             $count++;
 

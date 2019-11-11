@@ -940,7 +940,13 @@ onblur="javascript:dxcc_lookup(this.value);"
 <?
     if ($new or $edit) {
 ?>
-    <td><button onClick="javascript:save(<?=$edit;?>);">Save</button></td>
+    <td><button id="save<?=$edit;?>" onClick="javascript:save(<?=$edit;?>);">Save</button></td>
+<?
+    }
+
+    if ($edit) {
+?>
+    <td><button id="del<?=$edit;?>" onClick="javascript:del(<?=$edit;?>);">Delete</button></td>
 <?
     }
 ?>
