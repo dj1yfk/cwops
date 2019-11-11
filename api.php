@@ -15,7 +15,10 @@
         echo stats($_SESSION['callsign']);
         break;
     case 'aca':
-        echo aca($_SESSION['callsign']);
+        $year = $_GET['year'];
+        if ($year >= 2010 && $year <= date("Y")) {     
+            echo aca($_SESSION['callsign'], $year);
+        }
         break;
     case 'cma':
         echo cma($_SESSION['callsign']);

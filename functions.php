@@ -46,12 +46,12 @@ function stats($c) {
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
-<tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 0);?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
-<tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 0);?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
-<tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 1);?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
-<tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 1);?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
-<tr><td>WAE</td><td><?=$wae?></td><td><?=award_details('wae', 1);?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
-<tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 1);?></td><td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
+<tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
+<tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 'x');?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
+<tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 'b');?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
+<tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 'b');?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
+<tr><td>WAE</td><td><?=$wae?></td><td><?=award_details('wae', 'b');?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
+<tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 'b');?></td><td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
 </table>
 
 <br>
@@ -66,10 +66,18 @@ function stats($c) {
         else {
             var band = "";
         }
-        console.log('Details for ' + t + ' on ' + band);
+
+        if (document.getElementById('year'+t)) {
+            var year = document.getElementById('year'+t).value;
+        }
+        else {
+            var year = "";
+        }
+
+        console.log('Details for ' + t + ' on ' + band + " and year = " + year);
 
         var request =  new XMLHttpRequest();
-        request.open("GET", '/api?action=' + t + '&band=' + band, true);
+        request.open("GET", '/api?action=' + t + '&band=' + band + '&year=' + year, true);
         request.onreadystatechange = function() {
                 var done = 4, ok = 200;
                 if (request.readyState == done && request.status == ok) {
@@ -97,7 +105,7 @@ function stats($c) {
 function award_details($t, $b) {
     $ret = "<button id='$t' onClick='javascript:load_stats(this.id, \"details\");'>Show details</button>";
 
-    if ($b) {
+    if ($b == 'b') {
         $ret .= "<select name=\"band\" id=\"band$t\" size=1>
                <option>all</option>
                <option>160</option>
@@ -113,13 +121,26 @@ function award_details($t, $b) {
                <option>6</option>
                <option>2</option></select>";
     }
+    else if ($b == 'y') {
+        $ret .= "<select name=\"year\" id=\"year$t\" size=1>\n";
+        for ($i = 2010; $i <= date("Y"); $i++) {
+            if ($i == date("Y")) {
+                $selected = "selected";
+            }
+            else {
+                $selected = "";
+            }
+            $ret .= "<option $selected>$i</option>\n";
+        }
+        $ret .= "</select>";
+    }
     return $ret;
 }
 
-function aca($c) {
+function aca($c, $y) {
     global $db;
-    $ret = "<h2>ACA details for $c</h2>";
-    $q = mysqli_query($db, "SELECT `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) group by `nr`");
+    $ret = "";
+    $q = mysqli_query($db, "SELECT `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and year=$y group by `nr`");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -129,6 +150,8 @@ function aca($c) {
         $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td></tr>\n";
     }
     $ret .= "</table>";
+    $cnt--;
+    $ret = "<h2>ACA details for $c ($y): $cnt</h2>".$ret;
     return $ret;
 }
 
