@@ -123,7 +123,7 @@ function award_details($t, $b) {
     }
     else if ($b == 'y') {
         $ret .= "<select name=\"year\" id=\"year$t\" size=1>\n";
-        for ($i = 2010; $i <= date("Y"); $i++) {
+        for ($i = date("Y"); $i >= 2010; $i--) {
             if ($i == date("Y")) {
                 $selected = "selected";
             }
