@@ -16,7 +16,7 @@ while (my $line = <>) {
     my $callsign = $a[1];
     my $joined = $a[3];
     my $left = $a[4];
-    my $state = ($a[5] eq "K" or $a[5] eq "KL" or $a[5] eq "KH6") ? $a[6] : "";
+    my $state = ($a[5] eq "K" or $a[5] eq "KL7" or $a[5] eq "KL" or $a[5] eq "KH6") ? $a[6] : "";
  
     $joined = &dateformat($joined);
     if ($left) {
