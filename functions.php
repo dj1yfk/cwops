@@ -1023,7 +1023,7 @@ function score_table() {
 
     echo "<div class='container'>";
     # aca / cma combined table
-    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc;");
+    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc, cma desc;");
     echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
         if ($r[0] != "TEST") {
