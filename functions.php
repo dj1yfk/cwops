@@ -1153,5 +1153,11 @@ function is_call ($c) {
     return $ret;
 }
 
+function latest_member() {
+    global $db;
+    $q = mysqli_query($db, "select * from cwops_members order by nr desc limit 1");
+    $member = mysqli_fetch_object($q);
+    return "$member->callsign (#$member->nr, $member->joined) ";
+}
 
 ?>
