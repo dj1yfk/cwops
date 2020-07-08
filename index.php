@@ -369,6 +369,32 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <?
 }
 else {
+
+    # first check if there's a valid cookie
+    $id = $_COOKIE['cwops_id']+0;
+    $hash = $_COOKIE['cwops_hash'];
+    if (is_int($id) and preg_match("/^[a-f0-9]{40}$/", $hash)) { 
+        $redis = new Redis();
+        $redis->connect('127.0.0.1', 6379);
+        $h = $redis->hget("cwops_sessions", $_COOKIE['cwops_id']);
+        if ($h == $_COOKIE['cwops_hash']) { # correct cookie
+            $q = mysqli_query($db, "SELECT * from cwops_users where id='$id'");
+            $user = mysqli_fetch_object($q);
+            if ($user) {
+                $_SESSION['id'] = $user->id;
+                $_SESSION['callsign'] = $user->callsign;
+                $_SESSION['email'] = $user->email;
+                error_log("successful login of ".$user->callsign." (via cookie)");
+?>
+    <a href="/">Welcome back... Click here if you are not logged in automatically.</a>
+    <script>
+        window.location.href = "https://cwops.telegraphy.de/";
+    </script>
+<?
+            }
+        }
+    }
+
 ?>
 <p>In order to track your standings for the various <a href="https://cwops.org/contact-us/awards/">CWops awards</a>, create a free account <em>or</em> if you already have an account, log in with the form below:</p>
 

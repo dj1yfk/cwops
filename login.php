@@ -25,6 +25,11 @@ else {
 return;
 
 function logout () {
+    $redis = new Redis();
+    $redis->connect('127.0.0.1', 6379);
+    $redis->hset("cwops_sessions", $_SESSION['id'], "logout");
+    setcookie("cwops_id", "", 1); 
+    setcookie("cwops_hash", "", 1); 
     session_destroy();
     header("Location: https://cwops.telegraphy.de/");
     return;
@@ -136,6 +141,12 @@ function log_in_or_create ($call, $password, $recursive) {
             $_SESSION['id'] = $user->id;
             $_SESSION['callsign'] = $user->callsign;
             $_SESSION['email'] = $user->email;
+            $redis = new Redis();
+            $redis->connect('127.0.0.1', 6379);
+            $token = sha1(random_bytes(64));
+            $redis->hset("cwops_sessions", $user->id, $token);
+            setcookie("cwops_hash", $token, time() + (60 * 60 * 24 * 365)); 
+            setcookie("cwops_id", $user->id, time() + (60 * 60 * 24 * 365)); 
             echo "Login successful! Forwarding...";
             error_log("successful login of ".$user->callsign);
             return;
