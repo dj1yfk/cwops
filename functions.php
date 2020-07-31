@@ -1153,11 +1153,20 @@ function is_call ($c) {
     return $ret;
 }
 
-function latest_member() {
+function site_stats() {
     global $db;
+    $ret = "";
     $q = mysqli_query($db, "select * from cwops_members order by nr desc limit 1");
     $member = mysqli_fetch_object($q);
-    return "$member->callsign (#$member->nr, $member->joined) ";
+    $ret .= "Newest member in database: $member->callsign (#$member->nr, $member->joined) - ";
+    $q = mysqli_query($db, "select count(*) as c from cwops_users");
+    $cnt = mysqli_fetch_object($q);
+    $ret .= "Number of accounts: $cnt->c - ";
+    $q = mysqli_query($db, "select count(*) as c from cwops_log");
+    $cnt = mysqli_fetch_object($q);
+    $ret .= "Number of QSOs: $cnt->c";
+
+    return $ret;
 }
 
 ?>
