@@ -1,0 +1,13 @@
+https://stackoverflow.com/questions/9139787/how-to-fill-pdf-form-in-php
+
+pdftk form.pdf generate_fdf output data.fdf
+
+The fields are lines that start with /V (). Enter your desired values into
+those fields. 
+
+pdftk form.pdf fill_form data.fdf output form_with_data.pdf
+
+
+
+
+
