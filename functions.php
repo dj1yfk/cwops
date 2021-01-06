@@ -14,6 +14,7 @@ function stats($c) {
 
     # ACA
 
+    # $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2021");  # roll over => keep last year's scores
     $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE())");
     $r = mysqli_fetch_row($q);
     $aca = $r[0];
@@ -44,6 +45,7 @@ function stats($c) {
 
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
+<!-- p>Note: The year for which the scores are calculated will remain 2020 until January 5th, 2021, to give you sufficient time to upload your remaining 2020 logs. After that, it will switch to 2021 and the 2020 score table will be archived.</p -->
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
 <tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
@@ -1126,7 +1128,7 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     $template = file_get_contents("pdf/cwops-$type.fdf");
 
     if ($type == "aca") {
-        $fdf = sprintf($template, $callsign, date("Y"), $nr, $date, $score);
+        $fdf = sprintf($template, $callsign, date("Y")-1, $nr, $date, $score);
     }
     else {
         $fdf = sprintf($template, $callsign, $nr, $date, $score);
