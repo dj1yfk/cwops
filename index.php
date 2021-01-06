@@ -371,8 +371,8 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 else {
 
     # first check if there's a valid cookie
-    $id = $_COOKIE['cwops_id']+0;
-    $hash = $_COOKIE['cwops_hash'];
+    $id = array_key_exists('cwops_id', $_COOKIE) ? $_COOKIE['cwops_id']+0 : '';
+    $hash = array_key_exists('cwops_hash', $_COOKIE) ? $_COOKIE['cwops_hash'] : '';
     if (is_int($id) and preg_match("/^[a-f0-9]{40}$/", $hash)) { 
         $redis = new Redis();
         $redis->connect('127.0.0.1', 6379);

@@ -959,7 +959,12 @@ onblur="javascript:dxcc_lookup(this.value);"
 
 
 function validate_get ($i) {
-    $val = $_GET[$i];
+    if (array_key_exists($i, $_GET)) {
+        $val = $_GET[$i];
+    }
+    else {
+        $val = "";
+    }
     return validate($i, $val);
 }
 
