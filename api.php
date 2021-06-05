@@ -95,6 +95,9 @@
     case 'award_pdf':
         award_pdf();
         break;
+    case 'list':
+        member_list();
+        break;
     }
 
     function upload($ign) {
@@ -420,6 +423,14 @@
         }
     }
 
+    function member_list () {
+        global $db;
+        header("Content-type: text/csv");
+        $q = mysqli_query($db, "select * from cwops_members order by nr;");
+        while ($r = mysqli_fetch_row($q)) {
+            echo join(";", $r)."\n";
+        }
+    }
 
 
 
