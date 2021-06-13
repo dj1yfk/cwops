@@ -1033,7 +1033,7 @@ function score_table() {
     $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc, cma desc;");
     echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
-        if ($r[0] != "TEST") {
+        if ($r[0] != "TEST" and $r[2] > 0) {
             echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
         }
     }
@@ -1045,7 +1045,7 @@ function score_table() {
         $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
         echo "<table><tr><th>Call</th><th>".strtoupper($i)."</th></tr>\n";
         while ($r = mysqli_fetch_row($q)) {
-            if ($r[0] != "TEST") {
+            if ($r[0] != "TEST" and $r[1] > 0) {
                 echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
             }
         }
