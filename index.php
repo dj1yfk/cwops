@@ -405,7 +405,7 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <br>
 <h3>Manual score reporting</h3>
 <p>If you use a third party tool to calculate your CWops Award scores, you can disable the score calculation based on your log and enter the scores on a form.</p>
-<input type="checkbox" name="manual" id="manual_field" onclick="update_account('manual');" <? if ($_SESSION['manual'] == 1) { echo "checked"; }?>> Enter scores manually (need to log off and on to take effect)
+<input type="checkbox" name="manual" id="manual_field" onclick="update_account('manual');" <? if ($_SESSION['manual'] == 1) { echo "checked"; }?>> Enter scores manually
 </div>
 <div id="summary_div" style="display:none;">
 </div>
