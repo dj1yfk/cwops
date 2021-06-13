@@ -95,6 +95,7 @@ function recover () {
             $_SESSION['id'] = $user->id;
             $_SESSION['callsign'] = $user->callsign;
             $_SESSION['email'] = $user->email;
+            $_SESSION['manual'] = $user->manual;
             echo "Login successful! Forwarding...";
             error_log("successful recovery of ".$user->callsign);
         }
@@ -141,6 +142,7 @@ function log_in_or_create ($call, $password, $recursive) {
             $_SESSION['id'] = $user->id;
             $_SESSION['callsign'] = $user->callsign;
             $_SESSION['email'] = $user->email;
+            $_SESSION['manual'] = $user->manual;
             $redis = new Redis();
             $redis->connect('127.0.0.1', 6379);
             $token = sha1(random_bytes(64));

@@ -20,12 +20,18 @@ if (array_key_exists("id", $_SESSION)) {
 ?>
     <p>Logged in as <?=$_SESSION['callsign'];?>. <a href="/logout">Log out</a></p>
 
+<?
+    if ($_SESSION['manual'] == 0) {
+?>
     <P>Upload new ADIF, CAM or Cabrillo log:
     <input type="file" id="file" multiple /> <button id='upload' onClick='javascript:upload();'>Upload</button>
     <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)
     </p>
 
     <div id="upload_result"></div>
+<?
+    }
+?>
 
     <script>
 	function ol () {
@@ -76,8 +82,11 @@ if (array_key_exists("id", $_SESSION)) {
 
         for (var i = 0; i < items.length; i++) {
             console.log(items[i]);
-            document.getElementById(items[i]).style.fontWeight = "normal";
-            document.getElementById(items[i] + "_div").style.display = "none";
+            try {
+                document.getElementById(items[i]).style.fontWeight = "normal";
+                document.getElementById(items[i] + "_div").style.display = "none";
+            }
+            catch {}
         } 
 
         document.getElementById(item + "_div").style.display = "inline"; 
@@ -256,13 +265,17 @@ if (array_key_exists("id", $_SESSION)) {
     }
 
     function update_account(item) {
-        var value = document.getElementById(item + '_field').value;
-        console.log('update account ' + item + ' => ' + value);
-
-        if (!value) {
-            alert("Value for " + item  + " must not be empty!");
-            return;
+        if (item == 'manual') {
+            var value = document.getElementById(item + '_field').checked ? 1 : 0;
         }
+        else {
+            var value = document.getElementById(item + '_field').value;
+            if (!value) {
+                alert("Value for " + item  + " must not be empty!");
+                return;
+            }
+        }
+        console.log('update account ' + item + ' => ' + value);
 
         var request =  new XMLHttpRequest();
         request.open("POST", '/api?action=update_account', true);
@@ -291,15 +304,46 @@ if (array_key_exists("id", $_SESSION)) {
 			b.disabled = true;
         }
     }
+
+    function update_manual(i) {
+        var value = document.getElementById(i).value;
+        i = i.substr(0, i.length - "manual".length); 
+        var request =  new XMLHttpRequest();
+        request.open("POST", '/api?action=update_manual_score', true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    alert(request.responseText);
+                }
+            }
+        }
+        request.send(JSON.stringify({"item": i, "value": value}));
+
+    }
     </script>
 
 <br>
 
+<?
+    # normal menu
+    if ($_SESSION['manual'] == 0) {
+?>
 <button id='stats' style="font-weight:bold" onClick="javascript:show(this.id);reload_stats();">Show Stats</button>
 <button id='edit' onClick="javascript:show(this.id);">Edit QSOs</button>
 <button id='log' onClick="javascript:show(this.id);">Enter QSOs</button>
 <button id='uploads' onClick="javascript:show(this.id);reload_upload_history();">Show upload history</button>
 <button id='account' onClick="javascript:show(this.id);reload_account();">Account</button>
+<?
+    }
+    # menu for users who just enter their scores (manual mode), no uploads, etc.
+    else {
+?>
+<button id='stats' style="font-weight:bold" onClick="javascript:show(this.id);reload_stats();">Show Stats</button>
+<button id='account' onClick="javascript:show(this.id);reload_account();">Account</button>
+<?
+    }
+?>
 
 <br>
 
@@ -358,6 +402,10 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <tr><td>E-Mail:</td><td><input  oninput="check_email();" id='email_field' name='email' type='text' size='15' value="<?=$_SESSION['email'];?>"></td><td><button id="setemail" onClick="javascript:update_account('email');">Save email address</button></td></tr>
 </table>
 
+<br>
+<h3>Manual score reporting</h3>
+<p>If you use a third party tool to calculate your CWops Award scores, you can disable the score calculation based on your log and enter the scores on a form.</p>
+<input type="checkbox" name="manual" id="manual_field" onclick="update_account('manual');" <? if ($_SESSION['manual'] == 1) { echo "checked"; }?>> Enter scores manually (need to log off and on to take effect)
 </div>
 <div id="summary_div" style="display:none;">
 </div>

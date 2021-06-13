@@ -98,6 +98,9 @@
     case 'list':
         member_list();
         break;
+    case 'update_manual_score':
+        update_manual_score();
+        break;
     }
 
     function upload($ign) {
@@ -379,10 +382,17 @@
                 echo "Password must not be empty.";
                 return;
             }
+            $value = "'".$value."'";
             break;
         case 'email':
             $value = mysqli_real_escape_string($db, $o->value);
             $_SESSION['email'] = $value;
+            $value = "'".$value."'";
+            break;
+        case 'manual':
+            error_log($o->value);
+            $value = $o->value ? 1 : 0;
+            $_SESSION['manual'] = $value;
             break;
         default:
             echo "Invalid data.";
@@ -390,7 +400,8 @@
             break;
         }
 
-        $q = mysqli_query($db, "update cwops_users set ".$o->item." = '".$value."' where id=".$_SESSION['id']);
+        $query = "update cwops_users set ".$o->item." = ".$value." where id=".$_SESSION['id'];
+        $q = mysqli_query($db, $query);
         if ($q) {
             echo "Updated.";
         }
@@ -399,6 +410,31 @@
             error_log(mysqli_error($db));
         }
     }
+
+    function update_manual_score () {
+        global $db;
+
+        $postdata = file_get_contents("php://input");
+
+        $o = json_decode($postdata);
+
+        if (! (in_array($o->item, array("aca", "cma", "was", "dxcc", "wae", "waz")) and is_int(0+$o->value))) {
+            echo "Invalid data.";
+            return;
+        }
+
+        $query = "update cwops_scores set ".$o->item." = ".$o->value." where uid=".$_SESSION['id'];
+        error_log($query);
+        $q = mysqli_query($db, $query);
+        if ($q) {
+            echo "Updated.";
+        }
+        else {
+            echo "Data base error. Contact administrator if this persists.";
+            error_log(mysqli_error($db));
+        }
+    }
+
 
     function award_pdf () {
         $type = validate_get('type');

@@ -17,7 +17,7 @@
 <p>On the <a href="https://cwops.org/contact-us/awards/">CWops website</a>.</p>
 
 <h2>How do I report my scores?</h2>
-<p>Scores are automatically reported to the awards manager. There's nothing you need to do!</p>
+<p>Scores are automatically reported to the awards manager. There's nothing you need to do, just upload your logs!</p>
 
 <h2>Can I import my contacts from CAM?</h2>
 <p>Yes, just upload the "yourcall.data" file from CAM instead of an ADIF file.</p>
@@ -37,6 +37,9 @@
 
 <h2>Can I upload multiple files at once?</h2>
 <p>Yes, in the file open dialog, simply select more than one file by clicking on them while keeping the Ctrl key pressed.</p>
+
+<h2>I am using another software to calculate my scores, how can I report them?</h2>
+<p>In your account options check the box for manual score reporting. Then you'll get a form on which you can enter your raw numbers.</p>
 
 <h2>Thanks</h2>
 <p>Thanks to the following individuals for their help and contributions during the beta testing phase:</p>
