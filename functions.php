@@ -557,7 +557,7 @@ function parse_adif($adif, $members, $ign, $startdate) {
 
                     # we have a start date. if the QSO is before this date,
                     # ignore it.
-                    if ($startdate && $date <= $startdate) {
+                    if ($startdate && $date < $startdate) {
                         continue;
                     }
 
