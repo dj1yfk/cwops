@@ -646,6 +646,11 @@ function parse_adif($adif, $members, $ign, $startdate) {
                     if ($qso['call'] == "K7SV") {
                         $qso['waz'] = 5;
                     }
+                    if ($qso['call'] == "NL7VX") {
+                        $qso['waz'] = 5;
+                        $qso['dxcc'] = 291;
+                    }
+
 
                     array_push($out, $qso);
 
