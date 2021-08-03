@@ -1064,10 +1064,20 @@ function score_table() {
     echo "<div class='container'>";
     # aca / cma combined table
     $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc, cma desc;");
-    echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
+    echo "<table><tr><th>Rank</th><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
+    $cnt = 0;
+    $lastscore = 0;
     while ($r = mysqli_fetch_row($q)) {
         if ($r[0] != "TEST" and $r[2] > 0) {
-            echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
+            if ($r[1] != $lastscore) {
+                $cnt++;
+                $lastscore = $r[1];
+                $thiscnt = $cnt.".";
+            }
+            else {
+                $thiscnt = "";
+            }
+            echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl();\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
         }
     }
     echo "</table>";
@@ -1076,10 +1086,20 @@ function score_table() {
 
     foreach ($items as $i) {
         $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.$i as $i from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by $i desc;");
-        echo "<table><tr><th>Call</th><th>".strtoupper($i)."</th></tr>\n";
+        $cnt = 0;
+        $lastscore = 0;
+        echo "<table><tr><th>Rank</th><th>Call</th><th>".strtoupper($i)."</th></tr>\n";
         while ($r = mysqli_fetch_row($q)) {
             if ($r[0] != "TEST" and $r[1] > 0) {
-                echo "<tr><td onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
+                if ($r[1] != $lastscore) {
+                    $cnt++;
+                    $lastscore = $r[1];
+                    $thiscnt = $cnt.".";
+                }
+                else {
+                    $thiscnt = "";
+                }
+                echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl();\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
             }
         }
         echo "</table>";
@@ -1088,7 +1108,14 @@ function score_table() {
 
 ?>
 <script>
+    var hl_on_mouse_over = true;
+    function toggle_hl() {
+        hl_on_mouse_over = !hl_on_mouse_over;
+    }
     function hlcall(c, o) {
+        if (!hl_on_mouse_over) {
+            return;
+        }
         var el = document.getElementsByName(c);
         for (var i = 0; i < el.length; i++) {
             if (o) {
@@ -1107,18 +1134,91 @@ function score_table_by_call() {
     global $db;
 
     $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma, cwops_scores.dxcc as dxcc, cwops_scores.was as was, cwops_scores.wae as wae, cwops_scores.waz as waz, cwops_scores.updated as upd from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by callsign;");
-    echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th><th>DXCC</th><th>WAS</th><th>WAE</th><th>WAZ</th><th>Updated</th></tr>\n";
+    $out = array();
     while ($r = mysqli_fetch_row($q)) {
         if ($r[0] != "TEST" && $r[1] > 0) {
-            echo "<tr>";
-            echo "<td>".$r[0]."</td>";
-            for ($i = 1; $i <= 7; $i++) {
-                echo "<td class='score'>".$r[$i]."</td>";
-            }
-            echo "</tr>\n";
+            $r[0] = "'".$r[0]."'";
+            $r[7] = "'".$r[7]."'";
+            $out[] =  "[". join(',', $r)."]";
         }
     }
-    echo "</table>";
+
+    echo "<script> var filter = 0; var scores = [ ".join(',', $out)." ]; </script> Filter for these calls (or partials): <input onkeyup='update_table(filter);' id='filters' type='text' size='25' placeholder='enter callsigns to filter for...' value=''> <p>Click on a table header to sort by that column.</p> <span id='scoretable'></span>\n";
+
+?>
+
+    <script>
+        function update_table(f) {
+            filter = f;
+
+            // check for filter callsigns
+            var filter_calls = document.getElementById('filters').value;
+            filter_calls = filter_calls.replace(/,/g, '');
+
+            if (filter_calls.length) {
+                var fc = filter_calls.split(" ");
+            }
+
+            var scores_sort = scores;
+            if (f == 0) {
+                // calls: ascending
+                scores_sort.sort(function(a,b) {return (a[f] > b[f]) ? 1 :  0} );
+            }
+            else {
+                // everything else: descending
+                scores_sort.sort(function(a,b) {return (a[f] < b[f]) ? 1 :  0} );
+            }
+
+            var tbl = document.createElement('table');
+            var tr = tbl.insertRow();
+            tr.innerHTML = "<th>Rank</th><th onmouseup='update_table(0);'>Call</th><th onmouseup='update_table(1);'>ACA</th><th onmouseup='update_table(2);'>CMA</th><th onmouseup='update_table(3);'>DXCC</th><th onmouseup='update_table(4);'>WAS</th><th onmouseup='update_table(5);'>WAE</th><th onmouseup='update_table(6);'>WAZ</th><th onmouseup='update_table(7);'>Updated</th>";
+            var cnt = 0;
+            var lastscore = 0;
+            for (var i = 0; i < scores.length; i++) {
+                var found = true;
+                if (filter_calls.length) {
+                    found = false;
+                    for (var k = 0; k < fc.length; k++) {
+                        // if (fc[k].toUpperCase() == scores[i][0].toUpperCase()) {
+                        var re = new RegExp(fc[k].toUpperCase());
+                        if (fc[k].length && scores[i][0].match(re)) {
+                            found = true;
+                        }
+                    }
+                }
+
+                // line does not match filter
+                if (found == false) {
+                    continue;
+                }
+
+                tr = tbl.insertRow();
+                td = tr.insertCell();
+                if (scores[i][f] != lastscore) {
+                    cnt++;
+                    lastscore = scores[i][f];
+                    var showrank = cnt+ ".";
+                }
+                else {
+                    showrank = " = ";
+                }
+                td.appendChild(document.createTextNode(showrank));
+                for (var j = 0; j < 8; j++) {
+                   td = tr.insertCell();
+                   td.appendChild(document.createTextNode(scores[i][j]));
+                   if (j == f) {
+                       td.style.fontWeight = 'bold';
+                   }
+                }
+            }
+            document.getElementById('scoretable').innerHTML = '';
+            document.getElementById('scoretable').appendChild(tbl);
+        }
+
+        update_table(0);
+
+    </script>
+<?
 }
 
 function get_joindate($callsign) {
