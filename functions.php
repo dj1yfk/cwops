@@ -1109,7 +1109,7 @@ function score_table_by_call() {
     $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma, cwops_scores.dxcc as dxcc, cwops_scores.was as was, cwops_scores.wae as wae, cwops_scores.waz as waz, cwops_scores.updated as upd from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by callsign;");
     echo "<table><tr><th>Call</th><th>ACA</th><th>CMA</th><th>DXCC</th><th>WAS</th><th>WAE</th><th>WAZ</th><th>Updated</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
-        if ($r[0] != "TEST") {
+        if ($r[0] != "TEST" && $r[1] > 0) {
             echo "<tr>";
             echo "<td>".$r[0]."</td>";
             for ($i = 1; $i <= 7; $i++) {
