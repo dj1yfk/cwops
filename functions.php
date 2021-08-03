@@ -1187,14 +1187,7 @@ function score_table_by_call() {
                     }
                 }
 
-                // line does not match filter
-                if (found == false) {
-                    continue;
-                }
-
-                tr = tbl.insertRow();
-                td = tr.insertCell();
-                if (scores[i][f] != lastscore) {
+                if (scores[i][f] != lastscore || filter_calls.length) {
                     cnt++;
                     lastscore = scores[i][f];
                     var showrank = cnt+ ".";
@@ -1202,13 +1195,18 @@ function score_table_by_call() {
                 else {
                     showrank = " = ";
                 }
-                td.appendChild(document.createTextNode(showrank));
-                for (var j = 0; j < 8; j++) {
-                   td = tr.insertCell();
-                   td.appendChild(document.createTextNode(scores[i][j]));
-                   if (j == f) {
-                       td.style.fontWeight = 'bold';
-                   }
+
+                if (found == true) {
+                    tr = tbl.insertRow();
+                    td = tr.insertCell();
+                    td.appendChild(document.createTextNode(showrank));
+                    for (var j = 0; j < 8; j++) {
+                       td = tr.insertCell();
+                       td.appendChild(document.createTextNode(scores[i][j]));
+                       if (j == f) {
+                           td.style.fontWeight = 'bold';
+                        }
+                    }
                 }
             }
             document.getElementById('scoretable').innerHTML = '';
