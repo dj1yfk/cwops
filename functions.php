@@ -1077,7 +1077,7 @@ function score_table() {
             else {
                 $thiscnt = "";
             }
-            echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl();\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
+            echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl('$r[0]');\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
         }
     }
     echo "</table>";
@@ -1099,7 +1099,7 @@ function score_table() {
                 else {
                     $thiscnt = "";
                 }
-                echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl();\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
+                echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl('$r[0]');\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td></tr>\n";
             }
         }
         echo "</table>";
@@ -1108,17 +1108,29 @@ function score_table() {
 
 ?>
 <script>
+    var last_hl = "";
     var hl_on_mouse_over = true;
-    function toggle_hl() {
-        hl_on_mouse_over = !hl_on_mouse_over;
+    function toggle_hl(c) {
+        if (hl_on_mouse_over) {
+            hlcall(c, 1);
+            hl_on_mouse_over = false;
+        }
+        else {
+            // remove last marked call
+            hl_on_mouse_over = true;
+            hlcall(last_hl, 0);
+            hlcall(c, 1);
+        }
     }
     function hlcall(c, o) {
         if (!hl_on_mouse_over) {
             return;
         }
+        last_hl = c;
         var el = document.getElementsByName(c);
+
         for (var i = 0; i < el.length; i++) {
-            if (o) {
+            if (o && hl_on_mouse_over) {
                 el[i].style.background = "LightGreen";
             }
             else {
@@ -1183,10 +1195,15 @@ function score_table_by_call() {
                 if (filter_calls.length) {
                     found = false;
                     for (var k = 0; k < fc.length; k++) {
-                        // if (fc[k].toUpperCase() == scores[i][0].toUpperCase()) {
-                        var re = new RegExp(fc[k].toUpperCase());
-                        if (fc[k].length && scores_sort[i][0].match(re)) {
-                            found = true;
+                        try {
+                            var re = new RegExp(fc[k].toUpperCase());
+                            if (fc[k].length && scores_sort[i][0].match(re)) {
+                                found = true;
+                            }
+                        }
+                        catch (e) {
+                            console.log("invalid regex - ignoring");
+                            return;
                         }
                     }
                 }

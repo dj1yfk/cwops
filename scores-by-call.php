@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <head>
+<title>CWops Award Scores (ACA, CMA, DXCC, WAS, WAE, WAZ)</title>
 <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
-<h2>Score overview</h2>
-<a href="/">Back</a> - <a href="/scores">Score table</a><br><br>
+<h2>Sortable and searchable table</h2>
+<a href="/">Back</a> - <a href="/scores">Score overview</a><br><br>
 <?php
 session_start();
 include("functions.php");
