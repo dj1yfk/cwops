@@ -1162,11 +1162,15 @@ function score_table_by_call() {
             var scores_sort = scores;
             if (f == 0) {
                 // calls: ascending
-                scores_sort.sort(function(a,b) {return (a[f] > b[f]) ? 1 :  0} );
+                scores_sort = scores_sort.sort((a, b) => a[f].localeCompare(b[f]));
+            }
+            else if (f == 7) {
+                // date: descending
+                scores_sort = scores_sort.sort((a, b) => b[f].localeCompare(a[f]));
             }
             else {
-                // everything else: descending
-                scores_sort.sort(function(a,b) {return (a[f] < b[f]) ? 1 :  0} );
+                // everything else (numerical): descending
+                scores_sort = scores_sort.sort(function(a,b) { return b[f] - a[f]; });
             }
 
             var tbl = document.createElement('table');
@@ -1174,22 +1178,22 @@ function score_table_by_call() {
             tr.innerHTML = "<th>Rank</th><th onmouseup='update_table(0);'>Call</th><th onmouseup='update_table(1);'>ACA</th><th onmouseup='update_table(2);'>CMA</th><th onmouseup='update_table(3);'>DXCC</th><th onmouseup='update_table(4);'>WAS</th><th onmouseup='update_table(5);'>WAE</th><th onmouseup='update_table(6);'>WAZ</th><th onmouseup='update_table(7);'>Updated</th>";
             var cnt = 0;
             var lastscore = 0;
-            for (var i = 0; i < scores.length; i++) {
+            for (var i = 0; i < scores_sort.length; i++) {
                 var found = true;
                 if (filter_calls.length) {
                     found = false;
                     for (var k = 0; k < fc.length; k++) {
                         // if (fc[k].toUpperCase() == scores[i][0].toUpperCase()) {
                         var re = new RegExp(fc[k].toUpperCase());
-                        if (fc[k].length && scores[i][0].match(re)) {
+                        if (fc[k].length && scores_sort[i][0].match(re)) {
                             found = true;
                         }
                     }
                 }
 
-                if (scores[i][f] != lastscore || filter_calls.length) {
+                if (scores_sort[i][f] != lastscore || filter_calls.length) {
                     cnt++;
-                    lastscore = scores[i][f];
+                    lastscore = scores_sort[i][f];
                     var showrank = cnt+ ".";
                 }
                 else {
@@ -1202,7 +1206,7 @@ function score_table_by_call() {
                     td.appendChild(document.createTextNode(showrank));
                     for (var j = 0; j < 8; j++) {
                        td = tr.insertCell();
-                       td.appendChild(document.createTextNode(scores[i][j]));
+                       td.appendChild(document.createTextNode(scores_sort[i][j]));
                        if (j == f) {
                            td.style.fontWeight = 'bold';
                         }
