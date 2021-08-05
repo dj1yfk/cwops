@@ -1068,7 +1068,7 @@ function score_table() {
     $cnt = 0;
     $lastscore = 0;
     while ($r = mysqli_fetch_row($q)) {
-        if ($r[0] != "TEST" and $r[2] > 0) {
+        if ($r[0] != "TEST" and preg_match('/\d/', $r[0]) and $r[2] > 0) {
             if ($r[1] != $lastscore) {
                 $cnt++;
                 $lastscore = $r[1];
@@ -1090,7 +1090,7 @@ function score_table() {
         $lastscore = 0;
         echo "<table><tr><th>Rank</th><th>Call</th><th>".strtoupper($i)."</th></tr>\n";
         while ($r = mysqli_fetch_row($q)) {
-            if ($r[0] != "TEST" and $r[1] > 0) {
+            if ($r[0] != "TEST" and preg_match('/\d/', $r[0]) and $r[1] > 0) {
                 if ($r[1] != $lastscore) {
                     $cnt++;
                     $lastscore = $r[1];
