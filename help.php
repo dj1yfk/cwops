@@ -42,7 +42,7 @@
 <p>In your account options check the box for manual score reporting. Then you'll get a form on which you can enter your raw numbers.</p>
 
 <h2>Thanks</h2>
-<p>Thanks to the following individuals for their help and contributions during the beta testing phase:</p>
+<p>Thanks to the following individuals for their help and contributions:</p>
 <ul>
 <li>Pete, W1RM (beta testing)</li>
 <li>Bud, AA3B (beta testing)</li>
@@ -52,6 +52,7 @@
 <li>Petr, OK2CQR/OK7AN (HamQTH DXCC lookup API)</li>
 <li>Adam, SQ9S (beta testing)</li>
 <li>Giu, IT9VDQ (beta testing)</li>
+<li>Doug, KR2Q (bug reports)</li>
 </ul>
 
 <h2>Future plans</h2>

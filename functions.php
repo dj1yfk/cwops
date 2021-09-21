@@ -61,8 +61,8 @@ function stats_default($c) {
     $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).")");
     $r = mysqli_fetch_row($q);
     $wae = $r[0];
-    # add special WAE areas
-    $q = mysqli_query($db, "SELECT count(distinct(`wae`)) from cwops_log where LENGTH(wae) = 2 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).")");
+    # add special WAE areas (include Turkey / 390 because TA1 = ET is a WAE country)
+    $q = mysqli_query($db, "SELECT count(distinct(`wae`)) from cwops_log where LENGTH(wae) = 2 and `mycall`='$c' and dxcc in (390, ".implode(',', $wae_adif).")");
     $r = mysqli_fetch_row($q);
     $wae += $r[0];
 
