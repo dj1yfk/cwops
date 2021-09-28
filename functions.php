@@ -482,7 +482,20 @@ function parse_cam_cbr ($data, $members, $type) {
                 }
             }
 
-            $band = f2b($a[1]/1000)."m";
+            switch ($a[1]) {
+            case 50:
+                $band = "6m";
+                break;
+            case 70:
+                $band = "4m";
+                break;
+            case 144:
+                $band = "2m";
+                break;
+            default:
+                $band = f2b($a[1]/1000)."m";
+                break;
+            }
             $state = "--";
         }
 
