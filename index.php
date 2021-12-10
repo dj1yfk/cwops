@@ -395,7 +395,7 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 
 <h2>Change Account Settings</h2>
 
-<p>Here you can change your password and enter an email address (for account recovery). If you changed your callsign and want to change the account name, please send a mail to Fabian, DJ1YFK <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>.</p>
+<p>Here you can change your password and enter an email address (for account recovery). If you changed your callsign and want to change the account name, please send a mail to Fabian, DJ5CW<a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>.</p>
 
 <table>
 <tr><td>Password:</td><td> <input id='password_field' name='password' type='password' size='15'></td><td><button onClick="javascript:update_account('password');">Set new password</button></td></tr>
@@ -456,14 +456,14 @@ else {
 <p>When signing up, you accept the <a href="/privacy">privacy policy</a> of this site.</p>
 
 
-<p>Lost your password and no email address in account profile? Get in touch with <a href="mailto:help@cwops.telegraphy.de">Fabian, DJ1YFK</a> to reset your account.</p>
+<p>Lost your password and no email address in account profile? Get in touch with <a href="mailto:help@cwops.telegraphy.de">Fabian, DJ5CW</a> to reset your account.</p>
 
 <?
 }
 ?>
 
 <hr>
-<p>Last modified: <? echo date ("Y-m-d",  filemtime("index.php")); ?> - <?=site_stats();?> - <a href="http://fkurz.net/">Fabian Kurz, DJ1YFK</a> <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>
+<p>Last modified: <? echo date ("Y-m-d",  filemtime("index.php")); ?> - <?=site_stats();?> - <a href="http://fkurz.net/">Fabian Kurz, DJ5CW</a> <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>
 - <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Source code repository</a>
 </p>
 

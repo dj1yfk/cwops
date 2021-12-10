@@ -50,7 +50,7 @@ function lostpassword () {
     $r = mysqli_fetch_object($q);
 
     if ($r->email) {
-        echo "Sending recovery email to the saved email address. If you don't receive it, check your spam folder or get in touch with Fabian, DJ1YFK (fabian@fkurz.net) to request a new password.<br>";
+        echo "Sending recovery email to the saved email address. If you don't receive it, check your spam folder or get in touch with Fabian, DJ5CW (fabian@fkurz.net) to request a new password.<br>";
 
         $link = "https://cwops.telegraphy.de/recovery/".sha1($r->password)."/".$r->callsign;
 
@@ -65,7 +65,7 @@ $link
 If you didn't request this mail yourself, please disregard this message.
 
 73,
- Fabian, DJ1YFK (Administrator of CWops Award Tools)
+ Fabian, DJ5CW (Administrator of CWops Award Tools)
 ";
 
         mail($r->email, $subject, $mailtext, "From: CWops Award Tools <help@cwops.telegraphy.de>\r\nBcc: fabian@fkurz.net", "-fhelp@cwops.telegraphy.de");
@@ -73,7 +73,7 @@ If you didn't request this mail yourself, please disregard this message.
         echo "<a href='/'>Return to home page</a>";
     }
     else {
-        echo "No email address in the database. Please get in touch with Fabian, DJ1YFK (fabian@fkurz.net) to request a new password.<br>";
+        echo "No email address in the database. Please get in touch with Fabian, DJ5CW (fabian@fkurz.net) to request a new password.<br>";
         echo "<a href='/'>Return to home page</a>";
     }
     return;

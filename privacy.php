@@ -28,7 +28,7 @@ ol {
 
 <p> Diese Webseite wird betrieben von / This website is operated by</p>
 
-<p>Fabian Kurz, DJ1YFK<br>
+<p>Fabian Kurz, DJ5CW<br>
 Frohschammerstr. 8<br>
 D-80807 München<br>
 Germany<br>

@@ -26,7 +26,7 @@
 <p>All logs you upload are credited to the account you are logged in with, regardless of the callsign you made the contacts with. This means you can upload your ADIF files from portable, holiday or DXpedition operations just like those from your home station. They are all merged automatically.</p>
 
 <h2>How can I make QSOs with members on DXpeditions count?</h2>
-<p>Many additional (individual) member calls are already in the database and will be recognized automatically. If a contact is not counted, there are two options: Either enter the homecall of the operator in the comment field of your logbook in the format: <pre>CWO:DJ1YFK</pre> (no spaces, all upper case). Alternatively, just enter the contact manually in the "Enter QSOs" tab.</p>
+<p>Many additional (individual) member calls are already in the database and will be recognized automatically. If a contact is not counted, there are two options: Either enter the homecall of the operator in the comment field of your logbook in the format: <pre>CWO:DJ5CW</pre> (no spaces, all upper case). Alternatively, just enter the contact manually in the "Enter QSOs" tab.</p>
 
 <h2>Uploading the logs is very slow!</h2>
 <p>Depending on the current load on the server and your internet connection, uploading and processing 1000 QSOs takes about one minute. It is recommended to split up your log into smaller chunks if it's very large. Most logging programs will allow you to export ADIF logs by date, so it would be a reasonable idea to upload logs year by year.</p>
@@ -62,7 +62,7 @@
 
 <p><a href="/">Back to the main website</a></p>
 <hr>
-<p>Last modified: <? echo date ("Y-m-d",  filemtime("index.php")); ?> - <a href="http://fkurz.net/">Fabian Kurz, DJ1YFK</a> <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>
+<p>Last modified: <? echo date ("Y-m-d",  filemtime("index.php")); ?> - <a href="http://fkurz.net/">Fabian Kurz, DJ5CW</a> <a href="mailto:fabian@fkurz.net">&lt;fabian@fkurz.net&gt;</a>
 - <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Source code repository</a>
 </p>
 
