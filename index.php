@@ -12,7 +12,7 @@ include('functions.php');
 		</head>
 		<body>
 				<h1>CWops Award Tools</h1>
-				<p>This server provides services for members of <a href="https://cwops.org/">CWops</a>. <a href="/help">Help and Documentation</a> - <a href="/intro">Introduction Video</a> - <a href="/scores">Score table</a></p>
+				<p>This server provides services for members of <a href="https://cwops.org/">CWops</a>. <a href="/help">Help and Documentation</a> - <a href="/intro">Introduction Video</a> - <a href="/scores">Score table</a> - <a href="/scores-by-call">Search and sortable scores with graphs</a></p>
 
 <h2>ACA, CMA, WAS, WAE and WAZ tracking</h2>
 <?

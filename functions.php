@@ -1175,6 +1175,13 @@ function score_table_by_call() {
 
     <script>
         function update_table(f) {
+
+            try {
+                plot_calls = [];
+            }
+            catch (e) {
+            }
+
             filter = f;
 
             // check for filter callsigns
@@ -1201,7 +1208,7 @@ function score_table_by_call() {
 
             var tbl = document.createElement('table');
             var tr = tbl.insertRow();
-            tr.innerHTML = "<th>Rank</th><th onmouseup='update_table(0);'>Call</th><th onmouseup='update_table(1);'>ACA</th><th onmouseup='update_table(2);'>CMA</th><th onmouseup='update_table(3);'>DXCC</th><th onmouseup='update_table(4);'>WAS</th><th onmouseup='update_table(5);'>WAE</th><th onmouseup='update_table(6);'>WAZ</th><th onmouseup='update_table(7);'>Updated</th>";
+            tr.innerHTML = "<th>Rank</th><th onmouseup='update_table(0);'>Call</th><th onmouseup='update_table(1);'>ACA</th><th onmouseup='update_table(2);'>CMA</th><th onmouseup='update_table(3);'>DXCC</th><th onmouseup='update_table(4);'>WAS</th><th onmouseup='update_table(5);'>WAE</th><th onmouseup='update_table(6);'>WAZ</th><th onmouseup='update_table(7);'>Updated</th><th>Plot</th>";
             var cnt = 0;
             var lastscore = 0;
             for (var i = 0; i < scores_sort.length; i++) {
@@ -1240,8 +1247,21 @@ function score_table_by_call() {
                        td.appendChild(document.createTextNode(scores_sort[i][j]));
                        if (j == f) {
                            td.style.fontWeight = 'bold';
-                        }
+                       }
                     }
+                    td = tr.insertCell();
+                    var cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.name = scores_sort[i][0];
+                    cb.addEventListener('change', function () {
+                        try {
+                            plot_update(this.name, this.checked);
+                        }
+                        catch (e) {
+                            console.log("plot_update failed");
+                        }
+                    });
+                    td.appendChild(cb);
                 }
             }
             document.getElementById('scoretable').innerHTML = '';

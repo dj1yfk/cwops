@@ -481,6 +481,9 @@
             exit();
         }
 
+        $redis = new Redis();
+        $redis->connect('127.0.0.1', 6379);
+
         $calls = explode(',', $_GET['calls']);
 
         $ret = Array();
@@ -490,16 +493,24 @@
             if (!is_call($c))
                 continue;
 
-            $ret[$c] = Array();
+            $data = $redis->get("plotACA".$c);
 
-            $date = new DateTime("$year-01-01");
-            for ($i = 1; $i <= 52; $i++) {
-                $date->modify('next tuesday');
-                $tue = $date->format('Y-m-d');
-                $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) and date <= '$tue'");
-                $r = mysqli_fetch_row($q);
-                $aca = $r[0];
-                array_push($ret[$c], $aca);
+            if ($data) {
+                $ret[$c] = unserialize($data);
+            }
+            else {
+                $ret[$c] = Array();
+
+                $date = new DateTime("$year-01-01");
+                for ($i = 1; $i <= 52; $i++) {
+                    $date->modify('next tuesday');
+                    $tue = $date->format('Y-m-d');
+                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) and date <= '$tue'");
+                    $r = mysqli_fetch_row($q);
+                    $aca = $r[0];
+                    array_push($ret[$c], $aca);
+                }
+                $redis->set('plotACA'.$c, serialize($ret[$c]), 60*60*24);
             }
         }
 
