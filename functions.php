@@ -1041,6 +1041,7 @@ function validate ($type, $value) {
     case 'waz':
     case 'band':
     case 'id':
+    case 'year':
         if (is_numeric($value)) {
             return $value;
         }

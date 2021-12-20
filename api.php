@@ -101,6 +101,9 @@
     case 'update_manual_score':
         update_manual_score();
         break;
+    case 'plot':
+        plot();
+        break;
     }
 
     function upload($ign) {
@@ -466,6 +469,42 @@
         while ($r = mysqli_fetch_row($q)) {
             echo join(";", $r)."\n";
         }
+    }
+
+    # return JSON object to plot weekly data of the given calls for given award type (for now, only support ACA)
+    function plot () {
+        global $db;
+        $type = validate_get('type');
+        $year = validate_get('year');
+
+        if ($type != "ACA") {
+            exit();
+        }
+
+        $calls = explode(',', $_GET['calls']);
+
+        $ret = Array();
+
+        # get weekly scores from Tuesdays (i.e. before CWTs)
+        foreach ($calls as $c) {
+            if (!is_call($c))
+                continue;
+
+            $ret[$c] = Array();
+
+            $date = new DateTime("$year-01-01");
+            for ($i = 1; $i <= 52; $i++) {
+                $date->modify('next tuesday');
+                $tue = $date->format('Y-m-d');
+                $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) and date <= '$tue'");
+                $r = mysqli_fetch_row($q);
+                $aca = $r[0];
+                array_push($ret[$c], $aca);
+            }
+        }
+
+        echo json_encode($ret);
+
     }
 
 
