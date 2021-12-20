@@ -1,7 +1,7 @@
 <?
     session_start();
 
-    if (!array_key_exists('id', $_SESSION)) {
+    if (!array_key_exists('id', $_SESSION) and $_GET['action'] != 'plot') {
         echo "Not logged in. Please refresh your login.";
         return;
     }
