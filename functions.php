@@ -1175,13 +1175,6 @@ function score_table_by_call() {
 
     <script>
         function update_table(f) {
-
-            try {
-                plot_calls = [];
-            }
-            catch (e) {
-            }
-
             filter = f;
 
             // check for filter callsigns
@@ -1252,6 +1245,11 @@ function score_table_by_call() {
                     td = tr.insertCell();
                     var cb = document.createElement('input');
                     cb.type = 'checkbox';
+                    try {
+                        cb.checked = plot_calls.indexOf(scores_sort[i][0]) != -1;
+                    }
+                    catch (e) {
+                    }
                     cb.name = scores_sort[i][0];
                     cb.addEventListener('change', function () {
                         try {
