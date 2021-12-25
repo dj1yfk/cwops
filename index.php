@@ -432,6 +432,7 @@ else {
                 $_SESSION['id'] = $user->id;
                 $_SESSION['callsign'] = $user->callsign;
                 $_SESSION['email'] = $user->email;
+                $_SESSION['manual'] = $user->manual;
                 error_log("successful login of ".$user->callsign." (via cookie)");
 ?>
     <a href="/">Welcome back... Click here if you are not logged in automatically.</a>
