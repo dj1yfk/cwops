@@ -41,8 +41,8 @@ function stats_default($c) {
 
     # ACA
 
-    # $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2021");  # roll over => keep last year's scores
-    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE())");
+    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2021");  # roll over => keep last year's scores
+    #$q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE())");
     $r = mysqli_fetch_row($q);
     $aca = $r[0];
 
@@ -65,6 +65,14 @@ function stats_default($c) {
     $q = mysqli_query($db, "SELECT count(distinct(`wae`)) from cwops_log where LENGTH(wae) = 2 and `mycall`='$c' and dxcc in (390, ".implode(',', $wae_adif).")");
     $r = mysqli_fetch_row($q);
     $wae += $r[0];
+    # remove duplicate Kosovo if needed (it may be logged as WAE but with DXCC
+    # = Serbia (before 2018-01-21), and as a proper DXCC (after 2018-01-21) but
+    # should not count twice.
+    $q = mysqli_query($db, "SELECT count(distinct(dxcc)) from cwops_log where (wae='KO' and dxcc=296) or dxcc=522 and `mycall`='$c';");
+    $r = mysqli_fetch_row($q);
+    if ($r[0] == 2) {
+        $wae--;
+    }
 
     $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where waz > 0 and waz < 41 and `mycall`='$c'");
     $r = mysqli_fetch_row($q);
@@ -305,11 +313,20 @@ function wae($c, $b) {
         echo mysqli_error($db);
     }
 
+    # Special status for Kosovo: QSOs before 2018-01-21 count as WAE KO but
+    # DXCC Serbia. But we need to make sure only to count Kosovo once. So if
+    # we have Kosovo worked as a proper DXCC, don't count it again in the 2nd
+    # query where we specifically query for WAEs. 
+
+    $ko = false;
     $cnt = 1;
     $ret .= "<table><tr><th>Count</th><th>DXCC</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
         $ret .= "<tr><td>".$cnt++."</td><td>".$dxcc[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
         unset($needed[$r[0]]); 
+        if ($r[0] == 522) {
+            $ko = true;
+        }
     }
 
     # fetch extra WAE entities
@@ -319,8 +336,11 @@ function wae($c, $b) {
     }
     
     while ($r = mysqli_fetch_row($q)) {
-        $ret .= "<tr><td>".$cnt++."</td><td>".$waes[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
         unset($needed[$r[0]]); 
+        if ($ko && $r[0] == 'KO') {
+            continue;
+        }
+        $ret .= "<tr><td>".$cnt++."</td><td>".$waes[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
     }
 
     // replace numeric ADIF numbers with DXCC names and WAE abbreviations with
