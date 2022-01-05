@@ -39,7 +39,7 @@ function rc (c) {
         // nothing :-)
     }
     else {
-        var a = 'abcdef0123456789';
+        var a = '0123456789';
         var ret = '#';
         for (var i = 0; i < 6; i++) {
             ret += a[Math.floor(Math.random() * a.length)];
