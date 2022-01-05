@@ -73,7 +73,7 @@ function plot() {
     console.log("plot...");
     var request =  new XMLHttpRequest();
     var pc = plot_calls.join(",");
-    request.open("GET", "/api.php?action=plot&type=ACA&year=2021&calls="+pc, true);
+    request.open("GET", "/api.php?action=plot&type=ACA&year=2022&calls="+pc, true);
     request.onreadystatechange = function() {
         var done = 4, ok = 200;
         if (request.readyState == done && request.status == ok) {

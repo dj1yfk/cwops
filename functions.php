@@ -1337,7 +1337,7 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     $template = file_get_contents("pdf/cwops-$type.fdf");
 
     if ($type == "aca") {
-        $fdf = sprintf($template, $callsign, date("Y")-1, $nr, $date, $score);
+        $fdf = sprintf($template, $callsign, date("Y"), $nr, $date, $score);
     }
     else {
         $fdf = sprintf($template, $callsign, $nr, $date, $score);
@@ -1439,7 +1439,7 @@ function export_rbn ($c) {
 
         # CMA
         foreach ($bands as $b) {
-            if (!in_array($b, $cma[$m['nr']])) {
+            if (array_key_exists($m['nr'], $cma) && !in_array($b, $cma[$m['nr']])) {
                 $ret[$m['callsign']][$b] = array("CMA");
             }
         }
@@ -1449,5 +1449,6 @@ function export_rbn ($c) {
     return json_encode($ret, JSON_UNESCAPED_SLASHES);
 
 }
+
 
 ?>

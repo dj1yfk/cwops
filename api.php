@@ -1,4 +1,5 @@
 <?
+#    error_reporting(0);
     session_start();
 
     $access = false;
@@ -476,6 +477,7 @@
             header("Content-type: application/pdf");
             header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
             echo create_award ($callsign, $_SESSION['id'], $type, $score, date("d-M-Y"));
+             
         }
         else {
             echo "wrong type or callsign";
