@@ -1,7 +1,24 @@
 <?
     session_start();
 
-    if (!array_key_exists('id', $_SESSION) and $_GET['action'] != 'plot') {
+    $access = false;
+
+    // API functions that are allowed without login etc.
+    if ($_GET['action'] == 'plot') {
+        $access = true;
+    }
+
+    // API functions called by RBN Club Spotter
+    if ($_GET['action'] == 'export_rbn' && $_SERVER['REMOTE_ADDR'] == "88.99.84.60") {
+        $access = true;
+    }
+
+    // Existing session allows access
+    if (array_key_exists('id', $_SESSION)) {
+        $access = true;
+    }
+
+    if (!$access) {
         echo "Not logged in. Please refresh your login.";
         return;
     }
@@ -103,6 +120,9 @@
         break;
     case 'plot':
         plot();
+        break;
+    case 'export_rbn':
+        echo export_rbn($_GET['c']);
         break;
     }
 

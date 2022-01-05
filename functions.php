@@ -1380,4 +1380,74 @@ function site_stats() {
     return $ret;
 }
 
+# export a JSON for the rbn.telegraphy.de
+function export_rbn ($c) {
+    global $db;
+
+    if (!preg_match('/^[a-z0-9]{4,10}$/i', $c)) {
+        return "{}";
+    }
+
+    # ACA
+    $aca = array(); # for the current year, just a list of all worked member numbers
+    $q = mysqli_query($db, "SELECT distinct(`nr`) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE());");
+    while ($r = mysqli_fetch_row($q)) {
+        array_push($aca, $r[0]);
+    }
+
+    # CMA
+    $cma = array();  # for each member number, an array of worked bands
+    $q = mysqli_query($db, "SELECT nr, band from cwops_log where `mycall`='$c' group by nr, band;");
+    $nr = 0;
+    $arr = array();
+    while ($r = mysqli_fetch_row($q)) {
+        if ($r[0] != $nr) { # new member
+            if ($nr != 0) {
+                $cma[$nr] =  $arr;
+            }
+            $arr = array();
+            $arr[0] = $r[1];
+            $nr = $r[0];
+        }
+        else {
+            array_push($arr, $r[1]);
+        }
+    }
+
+
+    # Assemble JSON object with all known member calls and assign the
+    # information where they are needed
+
+    $members = get_memberlist();
+
+    #$proto = array("all" => "", "160" => "", "80" => "", "60" => "", "40" => "", "30" => "", "20" => "", "17" => "", "15" => "", "12" => "", "10" => "", "6" => "");
+
+    $bands = array("160", "80", "60", "40", "30", "20", "17", "15", "12", "10", "6");
+
+    $ret = array();
+    $cnt = 0;
+    foreach ($members as $m) {
+
+        if ($m['left'] <= date('Y-m-d')) {
+            continue;
+        }
+
+        # ACA
+        if (!in_array($m['nr'], $aca)) {
+            $ret[$m['callsign']]['all'] = array("ACA");
+        }
+
+        # CMA
+        foreach ($bands as $b) {
+            if (!in_array($b, $cma[$m['nr']])) {
+                $ret[$m['callsign']][$b] = array("CMA");
+            }
+        }
+
+    }
+
+    return json_encode($ret, JSON_UNESCAPED_SLASHES);
+
+}
+
 ?>
