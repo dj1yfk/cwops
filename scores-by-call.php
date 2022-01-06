@@ -23,7 +23,7 @@ echo score_table_by_call();
 
 <canvas id="c" width="800" height="600"></canvas>
 
-<p>The graph shows the ACA score of the selected station(s) on each week's Tuesday (i.e. before the CWTs).</p>
+<p>The graph shows the ACA score of the selected station(s) on each week's Tuesday (i.e. before the CWTs) of the current year, and the latest/current score.</p>
 
 </div>
 

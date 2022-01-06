@@ -1439,7 +1439,12 @@ function export_rbn ($c) {
 
         # CMA
         foreach ($bands as $b) {
-            if (array_key_exists($m['nr'], $cma) && !in_array($b, $cma[$m['nr']])) {
+            if (array_key_exists($m['nr'], $cma)) {
+                if (!in_array($b, $cma[$m['nr']])) {
+                    $ret[$m['callsign']][$b] = array("CMA");
+                }
+            }
+            else {
                 $ret[$m['callsign']][$b] = array("CMA");
             }
         }
