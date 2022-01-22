@@ -119,6 +119,8 @@ function plot() {
                     xpos = i * (hw / 52);
                     ypos = h - h/max * data[call][i];
                     ctx.lineTo(xpos, ypos);
+                    ctx.arc(xpos, ypos, 1, 0, Math.PI * 2, true); 
+                    ctx.lineTo(xpos, ypos);
                 }
                 var col = rc(call);
                 ctx.strokeStyle = col;
