@@ -1399,8 +1399,10 @@ function export_rbn ($c) {
     $cma = array();  # for each member number, an array of worked bands
     $q = mysqli_query($db, "SELECT nr, band from cwops_log where `mycall`='$c' group by nr, band;");
     $nr = 0;
+    $lastnr = 0;
     $arr = array();
     while ($r = mysqli_fetch_row($q)) {
+        $lastnr = $r[0];
         if ($r[0] != $nr) { # new member
             if ($nr != 0) {
                 $cma[$nr] =  $arr;
@@ -1414,6 +1416,13 @@ function export_rbn ($c) {
         }
     }
 
+    # anything left over from the *last* member?
+    if (count($arr)) {
+        error_log(print_r($lastnr,1));
+        error_log(print_r($arr,1));
+        $cma[$lastnr] = $arr;
+        error_log(print_r($cma[3158],1));
+    }
 
     # Assemble JSON object with all known member calls and assign the
     # information where they are needed
