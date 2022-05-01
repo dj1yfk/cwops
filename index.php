@@ -7,8 +7,11 @@ include('functions.php');
 		<head>
 				<link rel="stylesheet" type="text/css" href="/style.css">
 				<title>CWops Award Tools</title>
-				<link rel="icon" href="/favicon.ico">
-				<link rel="shortcut icon" href="/favicon.ico">
+				<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+				<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+				<link rel="icon" type="image/png" sizes="64x64" href="/favicon-64x64.png">
+				<link rel="icon" type="image/png" sizes="128x128" href="/favicon-128x128.png">
+				<link rel="icon" type="image/png" sizes="196x196" href="/favicon-196x196.png">
 		</head>
 		<body>
 				<h1>CWops Award Tools</h1>
