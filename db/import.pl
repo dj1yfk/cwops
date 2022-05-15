@@ -27,6 +27,27 @@ while (my $line = <>) {
     }
 
     print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$callsign', '$joined', '$left', '$state');\n";
+
+    # special calls for crown jubilee
+    my $nc = 0;
+    if ($callsign =~ /^VA(.*)/) {
+        $nc = "VG$1";
+    }
+    elsif ($callsign =~ /^VE(.*)/) {
+        $nc = "VX$1";
+    }
+    elsif ($callsign =~ /^VO(.*)/) {
+        $nc = "XJ$1";
+    }
+    elsif ($callsign =~ /^VY(.*)/) {
+        $nc = "XK$1";
+    }
+
+    if ($nc and $left eq "20990101") {
+        print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$nc', '20220514', '2099-01-01', '$state');\n";
+    }
+
+
 }
 
 
