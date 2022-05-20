@@ -6,5 +6,6 @@ $mysql_pass = "cwops";
 $mysql_dbname = "CWops";
 $db = mysqli_connect($mysql_host,$mysql_user,$mysql_pass,$mysql_dbname) or die
 ("<h1>Sorry: Could not connect to database.</h1>");
+mysqli_query($db, "SET time_zone='+0:00';");
 
 ?>
