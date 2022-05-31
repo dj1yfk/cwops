@@ -42,9 +42,13 @@ while (my $line = <>) {
     elsif ($callsign =~ /^VY(.*)/) {
         $nc = "XK$1";
     }
+    # Gx = GQ
+    elsif ($callsign =~ /^([2GM])[A-Z]?(.*)/) {
+        $nc = "$1Q$2";
+    }
 
     if ($nc and $left eq "20990101") {
-        print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$nc', '20220514', '2099-01-01', '$state');\n";
+        print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$nc', '20220514', '20990101', '$state');\n";
     }
 
 

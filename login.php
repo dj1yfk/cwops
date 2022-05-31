@@ -48,6 +48,8 @@ function lostpassword () {
 
     $q = mysqli_query($db, "SELECT * from cwops_users where `callsign`='$call'");
     $r = mysqli_fetch_object($q);
+    $link = "https://cwops.telegraphy.de/recovery/".sha1($r->password)."/".$r->callsign;
+    error_log($link);
 
     if ($r->email) {
         echo "Sending recovery email to the saved email address. If you don't receive it, check your spam folder or get in touch with Fabian, DJ5CW (fabian@fkurz.net) to request a new password.<br>";
