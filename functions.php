@@ -337,8 +337,11 @@ function wae($c, $b) {
     
     while ($r = mysqli_fetch_row($q)) {
         unset($needed[$r[0]]); 
-        if ($ko && $r[0] == 'KO') {
+        if ($ko && $r[0] == 'KO') { # do now show Kosovo twice (DXCC + WAE)
             continue;
+        }
+        if ($r[0] == 'KO') {        # if we have Kosovo as WAE but not DXCC, remove it from needed DXCC list
+            unset($needed[522]);
         }
         $ret .= "<tr><td>".$cnt++."</td><td>".$waes[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
     }
@@ -358,7 +361,6 @@ function wae($c, $b) {
         }
         unset($needed[$k]);
     }
-
 
     $ret .= "</table><br>Still needed:<br>".implode('<br>', array_keys($needed));
     return $ret;
@@ -640,12 +642,22 @@ function parse_adif($adif, $members, $ign, $startdate) {
                     }
 
                     # WAE "Region" http://adif.org/310/ADIF_310.htm#Region_Enumeration
-                    if (preg_match('/<REGION:\d+(:\w)?()>([A-Z]+)/', $q, $match)) {
+                    if (preg_match('/<REGION:\d+(:\w)?()>([A-Z]{2})/', $q, $match)) {
                         $qso['wae'] = $match[3];
                     }
                     else {
-                        if (substr($qso['call'], 0, 3) == "IT9") {
+                        # recognize some WAEs automatically
+                        if (in_array($qso['call'], array("4U1VIC", "4U1A"))) {
+                            $qso['wae'] = 'IV';
+                        }
+                        elseif (preg_match('/I[GH]9/')) {
+                            $qso['wae'] = 'AI';
+                        }
+                        elseif (substr($qso['call'], 0, 3) == "IT9") {
                             $qso['wae'] = 'SY';
+                        }
+                        elseif (preg_match('/^T[ABC]1[A-Z]+$/', $qso['call']) or substr($qso['call'], 0, 4) == "TA1/" ) { # first regex won't match TA1AA/2
+                            $qso['wae'] = 'ET';
                         }
                     }
 
