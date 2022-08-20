@@ -68,7 +68,7 @@ function stats_default($c) {
     # remove duplicate Kosovo if needed (it may be logged as WAE but with DXCC
     # = Serbia (before 2018-01-21), and as a proper DXCC (after 2018-01-21) but
     # should not count twice.
-    $q = mysqli_query($db, "SELECT count(distinct(dxcc)) from cwops_log where (wae='KO' and dxcc=296) or dxcc=522 and `mycall`='$c';");
+    $q = mysqli_query($db, "SELECT count(distinct(dxcc)) from cwops_log where ((wae='KO' and dxcc=296) or dxcc=522) and `mycall`='$c';");
     $r = mysqli_fetch_row($q);
     if ($r[0] == 2) {
         $wae--;
