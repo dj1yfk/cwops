@@ -343,6 +343,10 @@ function wae($c, $b) {
         $ret .= "<tr><td>".$cnt++."</td><td>".$waes[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
     }
 
+    if ($ko) {
+        unset($needed['KO']);
+    }
+
     // replace numeric ADIF numbers with DXCC names and WAE abbreviations with
     // full name
     foreach (array_keys($needed) as $k) {
@@ -354,6 +358,7 @@ function wae($c, $b) {
         }
         unset($needed[$k]);
     }
+
 
     $ret .= "</table><br>Still needed:<br>".implode('<br>', array_keys($needed));
     return $ret;
