@@ -335,18 +335,26 @@ function wae($c, $b) {
         echo mysqli_error($db);
     }
     
+    $kowae = false;
     while ($r = mysqli_fetch_row($q)) {
         unset($needed[$r[0]]); 
         if ($ko && $r[0] == 'KO') { # do now show Kosovo twice (DXCC + WAE)
             continue;
         }
         if ($r[0] == 'KO') {        # if we have Kosovo as WAE but not DXCC, remove it from needed DXCC list
+            $kowae = true;
             unset($needed[522]);
         }
         $ret .= "<tr><td>".$cnt++."</td><td>".$waes[$r[0]]." (".$r[0].")</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
     }
 
     if ($ko) {
+        unset($needed['KO']);
+    }
+
+    # do not show kosovo twice on needed list if it was neither worked as a
+    # DXCC nor as a WAE
+    if ($kowae == false && $ko == false) {
         unset($needed['KO']);
     }
 
