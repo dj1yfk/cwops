@@ -658,9 +658,6 @@ function parse_adif($adif, $members, $ign, $startdate) {
                         if (in_array($qso['call'], array("4U1VIC", "4U1A"))) {
                             $qso['wae'] = 'IV';
                         }
-                        elseif (preg_match('/I[GH]9/', $qso['call'])) {
-                            $qso['wae'] = 'AI';
-                        }
                         elseif (substr($qso['call'], 0, 3) == "IT9") {
                             $qso['wae'] = 'SY';
                         }
