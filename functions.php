@@ -558,7 +558,7 @@ function makeadi ($field, $value) {
 
 # parse ADIF and return member QSOs (matched by date) 
 function parse_adif($adif, $members, $ign, $startdate) {
-
+    global $arr_states;
     $out = array();
 
     # make hash table for quicker member lookup
@@ -658,7 +658,7 @@ function parse_adif($adif, $members, $ign, $startdate) {
                         if (in_array($qso['call'], array("4U1VIC", "4U1A"))) {
                             $qso['wae'] = 'IV';
                         }
-                        elseif (preg_match('/I[GH]9/')) {
+                        elseif (preg_match('/I[GH]9/', $qso['call'])) {
                             $qso['wae'] = 'AI';
                         }
                         elseif (substr($qso['call'], 0, 3) == "IT9") {
@@ -684,11 +684,6 @@ function parse_adif($adif, $members, $ign, $startdate) {
                         $qso['dxcc'] = lookup($qsocall, 'adif', $date);
                     }
 
-                    # as per WAS rules, DC counts as Maryland
-                    if ($qso['was'] == "DC") {
-                        $qso['was'] = "MD";
-                    }
-
                     # remove state for cases where it's not applicable, e.g.
                     # KP2/W1XYZ
                     #                   USA                   KL7                    KH6
@@ -696,8 +691,24 @@ function parse_adif($adif, $members, $ign, $startdate) {
                         $qso['was'] = "";
                     }
 
-                    if ($qso['was'] == "--") {
-                        $qso['was'] = "";
+                    if (array_key_exists('was', $qso) and $qso['was'] != "") {
+
+                        # as per WAS rules, DC counts as Maryland
+                        if ($qso['was'] == "DC") {
+                            $qso['was'] = "MD";
+                        }
+
+                        # PR is not a state for WAS
+                        if ($qso['was'] == "PR") {
+                            $qso['was'] = "";
+                        }
+
+                         # check if it's a proper state for US stations
+                         if (!array_key_exists($qso['was'], $arr_states)) {
+                             error_log("Imported state ".$qso['was']." for ".$qso['call']." invalid. ");
+                             $qso['was'] = "";
+                         }
+
                     }
 
                     # finally, some hard-coded exceptions:
