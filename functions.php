@@ -41,8 +41,7 @@ function stats_default($c) {
 
     # ACA
 
-    #$q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2021");  # roll over => keep last year's scores
-    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE())");
+    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2023");
     $r = mysqli_fetch_row($q);
     $aca = $r[0];
 

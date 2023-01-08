@@ -528,12 +528,11 @@
             else {
                 $ret[$c] = Array();
 
-                $date = new DateTime("$year-01-01");
+                $date = new DateTime("2023-01-01");
                 for ($i = 1; $i <= 52; $i++) {
                     $date->modify('next tuesday');
                     $tue = $date->format('Y-m-d');
-                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=YEAR(CURDATE()) and date <= '$tue'");
-                    #$q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2021 and date <= '$tue'");
+                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2023 and date <= '$tue'");
                     $r = mysqli_fetch_row($q);
                     $aca = $r[0];
                     array_push($ret[$c], $aca);
