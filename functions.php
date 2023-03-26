@@ -641,7 +641,7 @@ function parse_adif($adif, $members, $ign, $startdate) {
                     $qso['waz'] = 0;
                     $qso['wae'] = '';
                     $qso['dxcc'] = 0;
-					$qso['qsolength'] = $qso_length;
+                    $qso['qsolength'] = $qso_length;
 
                     if (!$ign) {
                         # see if there's a state in ADIF which overrides the state
@@ -880,13 +880,13 @@ function filter_qsos ($qsos, $callsign) {
             }
         }
 
-		if (new_qtx($q, $callsign)) {
+        if (new_qtx($q, $callsign)) {
             if ($q["qsolength"] >= 20) {
             array_push($reason, "QTX");
-		    }
-		    else if ($q["qsolength"] >= 10) {
+            }
+            else if ($q["qsolength"] >= 10) {
                 array_push($reason, "mQTX");
-		    }
+            }
         }
 
         # attach list of reasons why the QSO was added to the QSO record
