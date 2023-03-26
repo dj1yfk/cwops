@@ -76,6 +76,10 @@
         }
         echo lookup($call, 'json', $date);
         break;
+    case 'member_lookup':
+        $call = validate_get('hiscall');
+        echo member_lookup($call);
+        break;
     case 'overview':
         echo stats($_SESSION['callsign']);
         break;

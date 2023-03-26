@@ -219,6 +219,31 @@ if (array_key_exists("id", $_SESSION)) {
         request.send();
     }
 
+    // When entering a QSO manually, fill FOC nr and status
+    function member_lookup(c) {
+        console.log("member_lookup=" + c);
+        var request =  new XMLHttpRequest();
+        request.open("GET", '/api?action=member_lookup&hiscall=' + c, true);
+        request.onreadystatechange = function() {
+            var done = 4, ok = 200;
+            if (request.readyState == done && request.status == ok) {
+                if (request.responseText) {
+                    try {
+                        var o = JSON.parse(request.responseText);
+                        if (o['nr']) {
+                            var d = document.getElementById('nr0');
+                            d.value = o['nr'];
+                        }
+                    }
+                    catch (e) {
+                        console.log("parsing lookup json failed");
+                    }
+                }
+            }
+        }
+        request.send();
+    }
+
     function clear_form (nr) {
         var items = ['hiscall', 'nr', 'date', 'band'];
 

@@ -181,7 +181,7 @@ function aca($c, $y) {
         echo mysqli_error($db);
     }
     $cnt = 1;
-    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band (m)</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
         $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td></tr>\n";
     }
@@ -199,7 +199,7 @@ function cma($c) {
         echo mysqli_error($db);
     }
     $cnt = 1;
-    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band</th></tr>\n";
+    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band (m)</th></tr>\n";
     while ($r = mysqli_fetch_row($q)) {
         $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td></tr>\n";
     }
@@ -748,6 +748,17 @@ function f2b ($f) {
     return 0;
 }
 
+function member_lookup($call) {
+    global $associates;
+    $members = get_memberlist($call);
+
+    foreach ($members as $m) {
+        if ($m["callsign"] == $call) {
+            return json_encode($m);
+        }
+    }
+}
+
 # look up calls on HamQTH's API
 # Save all data in a local Redis Database to avoid flooding the API
 # Also load exceptions from OK1RR's country file.
@@ -963,7 +974,7 @@ function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $wa
 <input type="text" name="hiscall<?=$edit;?>" id="hiscall<?=$edit;?>" value="<?=$hiscallv;?>" <?
 if ($new) {
 ?>
-onblur="javascript:dxcc_lookup(this.value);"
+onblur="javascript:dxcc_lookup(this.value);member_lookup(this.value);"
 <?
 }
 ?> size=10>
