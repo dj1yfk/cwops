@@ -41,39 +41,39 @@ function stats_default($c) {
 
     # ACA
 
-    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2023");
+    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2023 and nr > 0");
     $r = mysqli_fetch_row($q);
     $aca = $r[0];
 
-    $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c' and nr > 0");
     $r = mysqli_fetch_row($q);
     $cma = $r[0];
 
-    $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where length(`was`) =  2 and `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct(`was`)) from cwops_log where length(`was`) =  2 and `mycall`='$c' and nr > 0");
     $r = mysqli_fetch_row($q);
     $was = $r[0];
 
-    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c' and nr > 0");
     $r = mysqli_fetch_row($q);
     $dxcc = $r[0];
 
-    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).")");
+    $q = mysqli_query($db, "SELECT count(distinct(`dxcc`)) from cwops_log where `dxcc` > 0 and `mycall`='$c' and dxcc in (".implode(',', $wae_adif).") and nr > 0");
     $r = mysqli_fetch_row($q);
     $wae = $r[0];
     # add special WAE areas (include Turkey / 390 because TA1 = ET is a WAE country)
-    $q = mysqli_query($db, "SELECT count(distinct(`wae`)) from cwops_log where LENGTH(wae) = 2 and `mycall`='$c' and dxcc in (390, ".implode(',', $wae_adif).")");
+    $q = mysqli_query($db, "SELECT count(distinct(`wae`)) from cwops_log where LENGTH(wae) = 2 and `mycall`='$c' and dxcc in (390, ".implode(',', $wae_adif).") and nr > 0");
     $r = mysqli_fetch_row($q);
     $wae += $r[0];
     # remove duplicate Kosovo if needed (it may be logged as WAE but with DXCC
     # = Serbia (before 2018-01-21), and as a proper DXCC (after 2018-01-21) but
     # should not count twice.
-    $q = mysqli_query($db, "SELECT count(distinct(dxcc)) from cwops_log where ((wae='KO' and dxcc=296) or dxcc=522) and `mycall`='$c';");
+    $q = mysqli_query($db, "SELECT count(distinct(dxcc)) from cwops_log where ((wae='KO' and dxcc=296) or dxcc=522) and `mycall`='$c' and nr > 0;");
     $r = mysqli_fetch_row($q);
     if ($r[0] == 2) {
         $wae--;
     }
 
-    $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where waz > 0 and waz < 41 and `mycall`='$c'");
+    $q = mysqli_query($db, "SELECT count(distinct(`waz`)) from cwops_log where waz > 0 and waz < 41 and `mycall`='$c' and nr > 0");
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
@@ -176,7 +176,7 @@ function award_details($t, $b) {
 function aca($c, $y) {
     global $db;
     $ret = "";
-    $q = mysqli_query($db, "SELECT `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and year=$y group by `nr`");
+    $q = mysqli_query($db, "SELECT `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and year=$y and nr > 0 group by `nr`");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -194,7 +194,7 @@ function aca($c, $y) {
 function cma($c) {
     global $db;
     $ret = "<h2>CMA details for $c</h2>";
-    $q = mysqli_query($db, "SELECT nr, hiscall, date, band from cwops_log where `mycall`='$c' group by nr, band");
+    $q = mysqli_query($db, "SELECT nr, hiscall, date, band from cwops_log where `mycall`='$c' and nr > 0 group by nr, band");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -219,7 +219,7 @@ function was($c, $b) {
     }
     $ret .= "</h2>"; 
 
-    $q = mysqli_query($db, "SELECT `was`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c'  and LENGTH(`was`) = 2 $band group by `was`");
+    $q = mysqli_query($db, "SELECT `was`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and nr > 0 and LENGTH(`was`) = 2 $band group by `was`");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -247,7 +247,7 @@ function waz($c, $b) {
     }
     $ret .="</h2>";
 
-    $q = mysqli_query($db, "SELECT `waz`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and waz > 0 $band group by `waz`");
+    $q = mysqli_query($db, "SELECT `waz`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and nr > 0 and waz > 0 $band group by `waz`");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -273,7 +273,7 @@ function dxcc($c, $b) {
     }
     $ret .="</h2>";
 
-    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc > 0 $band group by `dxcc` order by hiscall asc");
+    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and nr > 0 and dxcc > 0 $band group by `dxcc` order by hiscall asc");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -307,7 +307,7 @@ function wae($c, $b) {
     }
     $ret .="</h2>";
 
-    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and dxcc in (".implode(',', $wae_adif).") and wae='' $band group by `dxcc` order by hiscall asc");
+    $q = mysqli_query($db, "SELECT `dxcc`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and nr > 0 and dxcc in (".implode(',', $wae_adif).") and wae='' $band group by `dxcc` order by hiscall asc");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -329,7 +329,7 @@ function wae($c, $b) {
     }
 
     # fetch extra WAE entities
-    $q = mysqli_query($db, "SELECT `wae`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and LENGTH(wae) = 2  $band group by `wae`");
+    $q = mysqli_query($db, "SELECT `wae`, `nr`, hiscall, date, band from cwops_log where `mycall`='$c' and nr > 0 and LENGTH(wae) = 2  $band group by `wae`");
     if(!$q) {
         echo mysqli_error($db);
     }
@@ -423,7 +423,7 @@ function import($filename, $adif, $callsign, $ign) {
     }
 
     $qsos = parse_adif($adif, $members, $ign, $startdate);
-    $ret .= "Parsed log file with ".count($qsos)." QSOs with CWops members.<br>";
+    $ret .= "Parsed log file with ".count($qsos)." QSOs with CWops members (or QTX QSOs).<br>";
 
     $qsos = filter_qsos($qsos, $callsign);
     $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
@@ -573,7 +573,7 @@ function parse_adif($adif, $members, $ign, $startdate) {
     $qsos = explode("<EOR>", $adif);
 
     foreach ($qsos as $q) {
-        unset($call); unset($date); unset($band);
+        unset($call); unset($date); unset($band); unset($qso_length);
         if (preg_match('/<CALL:\d+(:\w)?()>([A-Z0-9\/]+)/', $q, $match)) {
             $qsocall = $match[3];
 
@@ -596,10 +596,21 @@ function parse_adif($adif, $members, $ign, $startdate) {
                 $call = $match[1];
             }
 
+            # check if this is a QTX QSO. Then it will be counted even if
+            # it's a non-member!
+            $qso_length = qso_length($q);
+
+            # Check if there's a "QLEN:" specified somewhere, e.g. in the
+            # comment field - this overrides anything found from TIME_ON
+            # and TIME_OFF
+            if (preg_match('/QLEN:([0-9\/]+)/', $q, $match)) {
+                $qso_length = $match[1];
+            }
+
             # check if it's a member and then date vs. membership date
-            if (array_key_exists($call, $mh)) {
+            if (array_key_exists($call, $mh) or $qso_length >= 10) {
                 preg_match('/<QSO_DATE:\d+(:\w)?()>([0-9]+)/', $q, $match);
-                if ($match[3] && $match[3] >= $mh[$call]['joined'] && $match[3] <= $mh[$call]['left']) {
+                if (($match[3] && $match[3] >= $mh[$call]['joined'] && $match[3] <= $mh[$call]['left']) or ($match[3] && $qso_length >= 10)) {
                     $date = $match[3];
 
                     # we have a start date. if the QSO is before this date,
@@ -624,11 +635,13 @@ function parse_adif($adif, $members, $ign, $startdate) {
                     $qso['call'] = $qsocall;
                     $qso['date'] = $date;
                     $qso['band'] = $band;
+                    $qso['nr'] = 0;    # QTX
                     $qso['nr'] = $mh[$call]['nr'];
                     $qso['was'] = $mh[$call]['was'];
                     $qso['waz'] = 0;
                     $qso['wae'] = '';
                     $qso['dxcc'] = 0;
+					$qso['qsolength'] = $qso_length;
 
                     if (!$ign) {
                         # see if there's a state in ADIF which overrides the state
@@ -728,6 +741,24 @@ function parse_adif($adif, $members, $ign, $startdate) {
     return $out;
 }
 
+function qso_length ($q) {
+    if (preg_match('/<TIME_ON:\d+(:\w)?()>([0-9]{2,2})([0-9]{2,2})/',  $q, $t_on ) &&
+        preg_match('/<TIME_OFF:\d+(:\w)?()>([0-9]{2,2})([0-9]{2,2})/', $q, $t_off)
+    ) { 
+        $hr1  = $t_on[3];
+        $hr2  = $t_off[3];
+        $min1 = $t_on[4];
+        $min2 = $t_off[4];
+
+        if ($min2 < $min1) { $min2 += 60; $hr2--; }
+        if ($hr2 < $hr1) { $hr2 += 24; }
+        $qso_length = ($min2 - $min1) + ($hr2 - $hr1)*60;
+        return $qso_length;
+    }
+    return 0;
+}
+
+
 function f2b ($f) {
     $f *= 1000;
     if ($f < 2000) { return "160"; }
@@ -826,29 +857,41 @@ function filter_qsos ($qsos, $callsign) {
     $out = array();
 
     foreach ($qsos as $q) {
-
+        # error_log(print_r($q,1));
         $reason = array();
-        if (new_aca($q, $callsign)) {
-            array_push($reason, "ACA");
+        if ($q['nr']) {
+            if (new_aca($q, $callsign)) {
+                array_push($reason, "ACA");
+            }
+            if (new_cma($q, $callsign)) {
+                array_push($reason, "CMA");
+            } 
+            if (new_was($q, $callsign)) {
+                array_push($reason, "WAS");
+            }
+            if (new_dxcc($q, $callsign)) {
+                array_push($reason, "DXCC");
+            }
+            if (new_wae($q, $callsign)) {
+                array_push($reason, "WAE");
+            }
+            if (new_waz($q, $callsign)) {
+                array_push($reason, "WAZ");
+            }
         }
-        if (new_cma($q, $callsign)) {
-            array_push($reason, "CMA");
-        } 
-        if (new_was($q, $callsign)) {
-            array_push($reason, "WAS");
-        }
-        if (new_dxcc($q, $callsign)) {
-            array_push($reason, "DXCC");
-        }
-        if (new_wae($q, $callsign)) {
-            array_push($reason, "WAE");
-        }
-        if (new_waz($q, $callsign)) {
-            array_push($reason, "WAZ");
+
+		if (new_qtx($q, $callsign)) {
+            if ($q["qsolength"] >= 20) {
+            array_push($reason, "QTX");
+		    }
+		    else if ($q["qsolength"] >= 10) {
+                array_push($reason, "mQTX");
+		    }
         }
 
         # attach list of reasons why the QSO was added to the QSO record
         if (count($reason)) {
+            # error_log(implode(", ", $reason));
             $q['reasons'] = implode(", ", $reason);
             array_push($out, $q);
             insert_qso($q, $callsign);
@@ -856,6 +899,15 @@ function filter_qsos ($qsos, $callsign) {
     }
 
     return $out;
+}
+
+# QTX: Allow QSO even on same day if different length
+function new_qtx($qso, $c) {
+    global $db;
+    $query = "SELECT count(*) from cwops_log where mycall='$c' and hiscall='".$qso['call']."' and date='".$qso['date']."' and qsolength=".$qso['qsolength'].";";
+    $q = mysqli_query($db, $query);
+    $r = mysqli_fetch_row($q);
+    return ($r[0] == 0); 
 }
 
 # ACA: New QSO with this member in the year of the QSO?
@@ -934,9 +986,10 @@ function new_waz($qso, $c) {
 
 function insert_qso($qso, $c) {
     global $db;
-    $query = "INSERT into cwops_log (`mycall`, `date`, `year`, `band`, `nr`, `hiscall`, `dxcc`, `wae`, `waz`, `was`) VALUES ".
+    if (!is_int($qso['nr'])) { $qso['nr'] = 0; } // QTX with non-members
+    $query = "INSERT into cwops_log (`mycall`, `date`, `year`, `band`, `nr`, `hiscall`, `dxcc`, `wae`, `waz`, `was`, `qsolength`) VALUES ".
         "('$c', '".$qso['date']."', '".substr($qso['date'], 0, 4)."', ".$qso['band'].", ".$qso['nr'].", '".$qso['call']."', ".$qso['dxcc'].",
-            '".$qso['wae']."', ".$qso['waz'].", '".$qso['was']."');";
+            '".$qso['wae']."', ".$qso['waz'].", '".$qso['was']."', ".$qso['qsolength'].");";
     $q = mysqli_query($db, $query);
     if (!$q) {
         error_log(mysqli_error($db));
