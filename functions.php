@@ -986,7 +986,7 @@ function new_waz($qso, $c) {
 
 function insert_qso($qso, $c) {
     global $db;
-    if (!is_int($qso['nr'])) { $qso['nr'] = 0; } // QTX with non-members
+    if ($qso['nr']+0==0) { $qso['nr'] = 0; } // QTX with non-members
     $query = "INSERT into cwops_log (`mycall`, `date`, `year`, `band`, `nr`, `hiscall`, `dxcc`, `wae`, `waz`, `was`, `qsolength`) VALUES ".
         "('$c', '".$qso['date']."', '".substr($qso['date'], 0, 4)."', ".$qso['band'].", ".$qso['nr'].", '".$qso['call']."', ".$qso['dxcc'].",
             '".$qso['wae']."', ".$qso['waz'].", '".$qso['was']."', ".$qso['qsolength'].");";
