@@ -77,6 +77,36 @@ function stats_default($c) {
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
+    # retrieve last saved result (if any) and generate diff display)
+    $q = mysqli_query($db, "select * from cwops_scores where uid=".$_SESSION['id']);
+    if ($q && $r = mysqli_fetch_array($q, MYSQLI_ASSOC)) {
+        if ($r['cma']) {
+            if ($cma - $r['cma'])
+                $cma = $cma." <span style='color:green'>+".($cma-$r['cma'])."</span>";
+            if ($aca - $r['aca'])
+                $aca = $aca." <span style='color:green'>+".($aca-$r['aca'])."</span>";
+            if ($was - $r['was'])
+                $was = $was." <span style='color:green'>+".($was-$r['was'])."</span>";
+            if ($dxcc - $r['dxcc'])
+                $dxcc = $dxcc." <span style='color:green'>+".($dxcc-$r['dxcc'])."</span>";
+            if ($wae - $r['wae'])
+                $wae = $wae." <span style='color:green'>+".($wae-$r['wae'])."</span>";
+            if ($waz - $r['waz'])
+                $waz = $waz." <span style='color:green'>+".($waz-$r['waz'])."</span>";
+        }
+    }
+
+
+
+
+    # finally, save to cwops_scores table
+    $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
+    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, NOW());");
+    if (!$q) {
+        error_log("score update failed".mysqli_error($db));
+    }
+
+
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
 <!-- p>Note: The year for which the scores are calculated will remain 2020 until January 5th, 2021, to give you sufficient time to upload your remaining 2020 logs. After that, it will switch to 2021 and the 2020 score table will be archived.</p -->
@@ -129,13 +159,6 @@ function stats_default($c) {
     </script>
 
 <?
-    # finally, save to cwops_scores table
-    $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
-    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, NOW());");
-    if (!$q) {
-        error_log("score update failed".mysqli_error($db));
-    }
-
 }   # stats
 
 function award_details($t, $b) {
