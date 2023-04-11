@@ -77,29 +77,32 @@ function stats_default($c) {
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
+    $cma_d = $cma;
+    $aca_d = $aca;
+    $was_d = $was;
+    $dxcc_d = $dxcc;
+    $wae_d = $wae;
+    $waz_d = $waz;
+
     # retrieve last saved result (if any) and generate diff display)
     $q = mysqli_query($db, "select * from cwops_scores where uid=".$_SESSION['id']);
     if ($q && $r = mysqli_fetch_array($q, MYSQLI_ASSOC)) {
         if ($r['cma']) {
             if ($cma - $r['cma'])
-                $cma = $cma." <span style='color:green'>+".($cma-$r['cma'])."</span>";
+                $cma_d = $cma." <span style='color:green'>+".($cma-$r['cma'])."</span>";
             if ($aca - $r['aca'])
-                $aca = $aca." <span style='color:green'>+".($aca-$r['aca'])."</span>";
+                $aca_d = $aca." <span style='color:green'>+".($aca-$r['aca'])."</span>";
             if ($was - $r['was'])
-                $was = $was." <span style='color:green'>+".($was-$r['was'])."</span>";
+                $was_d = $was." <span style='color:green'>+".($was-$r['was'])."</span>";
             if ($dxcc - $r['dxcc'])
-                $dxcc = $dxcc." <span style='color:green'>+".($dxcc-$r['dxcc'])."</span>";
+                $dxcc_d = $dxcc." <span style='color:green'>+".($dxcc-$r['dxcc'])."</span>";
             if ($wae - $r['wae'])
-                $wae = $wae." <span style='color:green'>+".($wae-$r['wae'])."</span>";
+                $wae_d = $wae." <span style='color:green'>+".($wae-$r['wae'])."</span>";
             if ($waz - $r['waz'])
-                $waz = $waz." <span style='color:green'>+".($waz-$r['waz'])."</span>";
+                $waz_d = $waz." <span style='color:green'>+".($waz-$r['waz'])."</span>";
         }
     }
 
-
-
-
-    # finally, save to cwops_scores table
     $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
     $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, NOW());");
     if (!$q) {
@@ -112,12 +115,12 @@ function stats_default($c) {
 <!-- p>Note: The year for which the scores are calculated will remain 2020 until January 5th, 2021, to give you sufficient time to upload your remaining 2020 logs. After that, it will switch to 2021 and the 2020 score table will be archived.</p -->
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
-<tr><td>ACA</td> <td><?=$aca?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
-<tr><td>CMA</td> <td><?=$cma?></td> <td><?=award_details('cma', 'x');?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
-<tr><td>WAS</td> <td><?=$was?></td> <td><?=award_details('was', 'b');?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
-<tr><td>DXCC</td><td><?=$dxcc?></td><td><?=award_details('dxcc', 'b');?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
-<tr><td>WAE</td><td><?=$wae?></td><td><?=award_details('wae', 'b');?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
-<tr><td>WAZ</td> <td><?=$waz?></td> <td><?=award_details('waz', 'b');?></td><td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
+<tr><td>ACA</td> <td><?=$aca_d?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
+<tr><td>CMA</td> <td><?=$cma_d?></td> <td><?=award_details('cma', 'x');?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
+<tr><td>WAS</td> <td><?=$was_d?></td> <td><?=award_details('was', 'b');?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
+<tr><td>DXCC</td><td><?=$dxcc_d?></td><td><?=award_details('dxcc', 'b');?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
+<tr><td>WAE</td><td><?=$wae_d?></td><td><?=award_details('wae', 'b');?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
+<tr><td>WAZ</td> <td><?=$waz_d?></td> <td><?=award_details('waz', 'b');?></td><td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
 </table>
 
 <br>
