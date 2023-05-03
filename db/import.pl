@@ -44,7 +44,7 @@ while (my $line = <>) {
     }
     # Gx = GQ
     elsif ($callsign =~ /^([2GM])[A-Z]?(.*)/) {
-        $nc = "$1Q$2";
+        $nc = "$1R$2";
     }
 
     if ($nc and $left eq "20990101") {
