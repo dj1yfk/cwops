@@ -497,6 +497,17 @@ else {
 - <a href="/privacy">Impressum / Datenschutz / Privacy Policy</a> - <a href="https://git.fkurz.net/dj1yfk/cwops">Source code repository</a>
 </p>
 
+<script>
+// keep the session cookie alife as long as user is on the page, refresh every
+// 10 minutes
+function session_keepalive () {
+    var request =  new XMLHttpRequest();
+    request.open("GET", "/api?action=lookup&hiscall=DL6RAI", true);
+    request.send();
+}
+window.setInterval('session_keepalive()', 600000);
+</script>
+
 </body>
 </html>
 
