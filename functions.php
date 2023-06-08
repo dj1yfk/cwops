@@ -77,12 +77,22 @@ function stats_default($c) {
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 20 and `mycall`='$c' and year=2023");
+    $r = mysqli_fetch_row($q);
+    $qtx = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 10 and qsolength < 20 and `mycall`='$c' and year=2023");
+    $r = mysqli_fetch_row($q);
+    $mqtx = $r[0];
+
     $cma_d = $cma;
     $aca_d = $aca;
     $was_d = $was;
     $dxcc_d = $dxcc;
     $wae_d = $wae;
     $waz_d = $waz;
+    $qtx_d = $qtx;
+    $mqtx_d = $mqtx;
 
     # retrieve last saved result (if any) and generate diff display)
     $q = mysqli_query($db, "select * from cwops_scores where uid=".$_SESSION['id']);
@@ -100,11 +110,15 @@ function stats_default($c) {
                 $wae_d = $wae." <span style='color:green'>+".($wae-$r['wae'])."</span>";
             if ($waz - $r['waz'])
                 $waz_d = $waz." <span style='color:green'>+".($waz-$r['waz'])."</span>";
+            if ($qtx - $r['qtx'])
+                $qtx_d = $qtx." <span style='color:green'>+".($qtx-$r['qtx'])."</span>";
+            if ($mqtx - $r['mqtx'])
+                $mqtx_d = $mqtx." <span style='color:green'>+".($mqtx-$r['mqtx'])."</span>";
         }
     }
 
     $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
-    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, NOW());");
+    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `qtx`, `mqtx`,`updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, $qtx, $mqtx, NOW());");
     if (!$q) {
         error_log("score update failed".mysqli_error($db));
     }
@@ -121,6 +135,7 @@ function stats_default($c) {
 <tr><td>DXCC</td><td><?=$dxcc_d?></td><td><?=award_details('dxcc', 'b');?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
 <tr><td>WAE</td><td><?=$wae_d?></td><td><?=award_details('wae', 'b');?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
 <tr><td>WAZ</td> <td><?=$waz_d?></td> <td><?=award_details('waz', 'b');?></td><td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
+<tr><td>QTX</td> <td><?=$qtx_d?> / <?=$mqtx_d?></td> <td><?=award_details('qtx', 'x');?></td><td></td></tr>
 </table>
 
 <br>
@@ -398,6 +413,51 @@ function wae($c, $b) {
     $ret .= "</table><br>Still needed:<br>".implode('<br>', array_keys($needed));
     return $ret;
 }
+
+function qtx($c) {
+    global $db;
+
+    $s = array();
+
+    $ret = "<div class='qtxcontainer'>";
+    foreach (array("QTX", "mQTX") as $t) {
+        if ($t == "mQTX") 
+            $q = mysqli_query($db, "SELECT nr, hiscall, date, band, qsolength from cwops_log where `mycall`='$c' and year=2023 and qsolength >= 10 and qsolength < 20");
+        else
+            $q = mysqli_query($db, "SELECT nr, hiscall, date, band, qsolength from cwops_log where `mycall`='$c' and year=2023 and qsolength >= 20");
+
+        if(!$q) {
+            echo mysqli_error($db);
+        }
+        $cnt = 1;
+        $ret .= "<table><tr><th colspan=6>$t</th></tr><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band (m)</th><th>Length</th></tr>\n";
+        while ($r = mysqli_fetch_row($q)) {
+            if ($r[0]+0 == 0) {
+                $r[0] = "";
+            }
+            $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td><td>".$r[4]."</td></tr>\n";
+        }
+        $s[$t] = $cnt-1;
+        $ret .= "</table>&nbsp;";
+
+        # Lifetime scores
+        if ($t == "mQTX") 
+            $q = mysqli_query($db, "SELECT count(*) from cwops_log where `mycall`='$c' and qsolength >= 10 and qsolength < 20");
+        else
+            $q = mysqli_query($db, "SELECT count(*) from cwops_log where `mycall`='$c' and qsolength >= 20");
+
+        $r = mysqli_fetch_row($q);
+        $s["lt$t"] = $r[0];
+
+    }
+    $ret .= "</div>";
+
+    $ret = "<h2>QTX details for $c</h2>\n<table><tr><td>QTX/mQTX this year:</td><td>".$s["QTX"]."</td><td>".$s["mQTX"]."</td></tr><tr><td>QTX/mQTX lifetime:</td><td>".$s["ltQTX"]."</td><td>".$s["ltmQTX"]."</td></tr></table><br><br>".$ret;
+
+
+    return $ret;
+}
+
 
 
 

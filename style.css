@@ -44,4 +44,7 @@ code {
     grid-gap: 5px;
 }
 
-
+div.qtxcontainer table {
+    display: inline-block;
+    vertical-align:top;
+}

@@ -65,6 +65,9 @@
             echo wae($_SESSION['callsign'], $band);
         }
         break;
+    case 'qtx':
+        echo qtx($_SESSION['callsign']);
+        break;
     case 'lookup':
         $call = validate_get('hiscall');
         $date = validate_get('date');
