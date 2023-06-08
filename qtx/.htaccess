@@ -1,0 +1,5 @@
+AuthType Basic
+AuthName "qrz?"
+AuthUserFile /home/fabian/sites/cwops.telegraphy.de/qtx/.htpasswd
+Require user m0ktz
+

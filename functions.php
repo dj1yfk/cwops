@@ -77,6 +77,7 @@ function stats_default($c) {
     $r = mysqli_fetch_row($q);
     $waz = $r[0];
 
+    # QTX current year
     $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 20 and `mycall`='$c' and year=2023");
     $r = mysqli_fetch_row($q);
     $qtx = $r[0];
@@ -84,6 +85,27 @@ function stats_default($c) {
     $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 10 and qsolength < 20 and `mycall`='$c' and year=2023");
     $r = mysqli_fetch_row($q);
     $mqtx = $r[0];
+
+    # Lifetime QTX
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 20 and `mycall`='$c'");
+    $r = mysqli_fetch_row($q);
+    $ltqtx = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 10 and qsolength < 20 and `mycall`='$c' and date >= '2018-07-01'");
+    $r = mysqli_fetch_row($q);
+    $ltmqtx = $r[0];
+
+    # "Current month" QTX (where current month shows last month's value up to
+    # the 5th of the next month)
+    if (date("d") >= 6) { $cm = date("Y-m"); }
+    else { $cm = date("Y-m", time() - 24*7*60*60); }
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 20 and `mycall`='$c' and date like '$cm%'");
+    $r = mysqli_fetch_row($q);
+    $cmqtx = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 10 and qsolength < 20 and `mycall`='$c' and date like '$cm%'");
+    $r = mysqli_fetch_row($q);
+    $cmmqtx = $r[0];
 
     $cma_d = $cma;
     $aca_d = $aca;
@@ -118,7 +140,7 @@ function stats_default($c) {
     }
 
     $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
-    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `qtx`, `mqtx`,`updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, $qtx, $mqtx, NOW());");
+    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `qtx`, `mqtx`, `ltqtx`, `ltmqtx`, `cmqtx`, `cmmqtx`,`updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, $qtx, $mqtx, $ltqtx, $ltmqtx, $cmqtx, $cmmqtx, NOW());");
     if (!$q) {
         error_log("score update failed".mysqli_error($db));
     }
@@ -442,7 +464,7 @@ function qtx($c) {
 
         # Lifetime scores
         if ($t == "mQTX") 
-            $q = mysqli_query($db, "SELECT count(*) from cwops_log where `mycall`='$c' and qsolength >= 10 and qsolength < 20");
+            $q = mysqli_query($db, "SELECT count(*) from cwops_log where `mycall`='$c' and qsolength >= 10 and qsolength < 20 and date >= '2018-07-01'");
         else
             $q = mysqli_query($db, "SELECT count(*) from cwops_log where `mycall`='$c' and qsolength >= 20");
 
