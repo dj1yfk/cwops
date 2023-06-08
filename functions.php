@@ -669,6 +669,12 @@ function parse_adif($adif, $members, $ign, $startdate) {
                     $qso['dxcc'] = 0;
                     $qso['qsolength'] = $qso_length;
 
+                    # make sure every QSO is at least one minute long, we use 0
+                    # as an invalid value
+                    if ($qso['qsolength'] == 0) {
+                        $qso['qsolength'] = 1;
+                    }
+
                     if (!$ign) {
                         # see if there's a state in ADIF which overrides the state
                         # from the database
@@ -1034,7 +1040,7 @@ function get_log ($call) {
     return $out;
 }
 
-function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $waev, $edit) {
+function editformline($hiscallv, $nrv, $datev, $bandv, $dxccv, $wazv, $wasv, $waev, $qsolengthv, $edit) {
     global $dxcc;
     global $states;
     global $waes;
@@ -1127,6 +1133,9 @@ onblur="javascript:dxcc_lookup(this.value);member_lookup(this.value);"
 ?>
 </select>
 </td>
+<td>
+<input type="text" name="qsolength<?=$edit;?>" id="qsolength<?=$edit;?>" value="<?=$qsolengthv;?>" size=3>
+</td>
 <?
     if ($new or $edit) {
 ?>
@@ -1207,6 +1216,14 @@ function validate ($type, $value) {
         }
         else {
             return "";
+        }
+        break;
+    case 'qsolength':
+        if (preg_match('/^[0-9]{1,4}$/', $value)) {
+            return $value;
+        }
+        else {
+            return 0;
         }
         break;
     default:

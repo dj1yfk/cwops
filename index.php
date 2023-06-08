@@ -105,11 +105,12 @@ if (array_key_exists("id", $_SESSION)) {
         var waz = document.searchform.waz.value;
         var was = document.searchform.was.value;
         var wae = document.searchform.wae.value;
+        var qsolength = document.searchform.qsolength.value;
 
-        console.log("search " + hiscall+ " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae);
+        console.log("search " + hiscall+ " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae + " " + qsolength);
 
         var request =  new XMLHttpRequest();
-        request.open("GET", '/api?action=search&hiscall=' + hiscall + "&nr=" + nr + "&date=" + ddate + "&band=" + band + "&dxcc=" + dxcc + "&waz=" + waz + "&was=" + was + "&wae=" + wae, true);
+        request.open("GET", '/api?action=search&hiscall=' + hiscall + "&nr=" + nr + "&date=" + ddate + "&band=" + band + "&dxcc=" + dxcc + "&waz=" + waz + "&was=" + was + "&wae=" + wae + "&qsolength=" + qsolength, true);
         request.onreadystatechange = function() {
             var done = 4, ok = 200;
             if (request.readyState == done && request.status == ok) {
@@ -144,7 +145,7 @@ if (array_key_exists("id", $_SESSION)) {
 
     function save (id) {
         //try {
-        var items = ['hiscall', 'nr', 'date', 'band', 'dxcc', 'waz', 'was', 'wae'];
+        var items = ['hiscall', 'nr', 'date', 'band', 'dxcc', 'waz', 'was', 'wae', 'qsolength'];
         var o = new Object();
 
         for (var i = 0; i < items.length; i++) {
@@ -383,10 +384,10 @@ search item below and hit <button id='search' onClick="javascript:search();">Sea
 
 <form name="searchform">
 <table>
-<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th></tr>
+<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Length (min)</th></tr>
 
 <?
-    editformline("", "", "", "", "", "", "", "", "");
+    editformline("", "", "", "", "", "", "", "", "", "");
 ?>
 </table>
 </form>
@@ -404,9 +405,9 @@ If you like to start over (re-upload your whole log), you can delete all QSOs th
 <h2>Log contacts manually</h2>
 <p>Here you can easily enter contacts manually, for example to add QSOs with members on DXpeditions. <button id='search' onClick="javascript:clear_form(0);">Clear Form</button></p>
 <table>
-<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Save</th><th>Delete</th></tr>
+<tr><th>Callsign</th><th>CWops #</th><th>Date (YYYY-MM-DD)</th><th>Band</th><th>DXCC</th><th>WAZ</th><th>WAS</th><th>WAE</th><th>Length (min)</th><th>Save</th><th>Delete</th></tr>
 <?
-    editformline("", "", "", "", "", "", "", "", "new");
+    editformline("", "", "", "", "", "", "", "", "", "new");
 ?>
 </table>
 
