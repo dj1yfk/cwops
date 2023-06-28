@@ -689,10 +689,16 @@ function parse_adif($adif, $members, $ign, $startdate) {
             if (!preg_match('/<MODE:2(:\w)?()>CW/', $q)) {
                 continue;
             }
-            
+
             # strip call (portable stuff etc.)
-            if (preg_match('/^(\w{1,3}\/)?(\w{3,99})(\/\w{1,3})?$/', $qsocall, $match)) {
-                $call = $match[2];
+            if (preg_match('/\//', $qsocall, $match)) {
+                $tmp = explode('/', $qsocall);
+                $call = "";
+                foreach ($tmp as $c) {
+                    if (strlen($c) > strlen($call)) {
+                        $call = $c;
+                    }
+                }
             }
             else {
                 $call = $qsocall;
