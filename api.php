@@ -204,9 +204,10 @@
                     $o->$i = $match[1];
                 }
 
-
                 if (!validate($i, $o->$i)) {
-                    $err .= "$i (".$o->$i.") ";
+                    if (!($i == "nr" and $o->nr == 0 and $o->qsolength > 9)) {
+                        $err .= "$i (".$o->$i.") ";
+                    }
                 } 
             }
 
