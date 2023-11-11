@@ -750,7 +750,11 @@ function parse_adif($adif, $members, $ign, $startdate) {
                     $qso['date'] = $date;
                     $qso['band'] = $band;
                     $qso['nr'] = 0;    # QTX
-                    $qso['nr'] = $mh[$call]['nr'];
+                    # assign CWops number to this QSO only they were a member
+                    # at this time... (could be a QTX QSO with an ex member)
+                    if ($date >= $mh[$call]['joined'] && $date <= $mh[$call]['left']) {
+                        $qso['nr'] = $mh[$call]['nr'];
+                    }
                     $qso['was'] = $mh[$call]['was'];
                     $qso['waz'] = 0;
                     $qso['wae'] = '';
@@ -918,6 +922,10 @@ function lookup ($call, $what, $date) {
 
     if (!$call) {
         return "";
+    }
+
+    if ($call == "W8S") {
+        $call = "KH8S";
     }
 
     # check if this callsign is in OK1RR's exception list
