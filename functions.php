@@ -1084,6 +1084,9 @@ function new_aca($qso, $c) {
 function new_acma($qso, $c) {
     global $db;
     $qsoyear = substr($qso['date'], 0, 4);
+    if ($qsoyear < 2024) {
+        return 0;
+    }
     $q = mysqli_query($db, "SELECT count(*) from cwops_log where mycall='$c' and nr=".$qso['nr']." and band=".$qso['band']." and year=$qsoyear");
     $r = mysqli_fetch_row($q);
     return ($r[0] == 0); 
