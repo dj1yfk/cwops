@@ -1,0 +1,62 @@
+\documentclass[%
+    ,fontsize=22pt
+    ,paper=letter
+    ,pagesize
+    ,BCOR=8mm
+    ,headinclude=true
+    ,footinclude=false
+    ,mpinclude=false
+    ,DIV=calc
+    ]{scrreprt}
+\usepackage[margin=0pt]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{eurosym}
+%\usepackage{microtype}
+%\usepackage{ebgaramond}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+%\usepackage{bookman}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\newcommand\BackgroundPic{
+    \put(-7,0){
+    \parbox[b][\paperheight]{\paperwidth}{%
+    \vfill
+    \centering
+    \includegraphics[width=\paperwidth,height=\paperheight]{cwops-award-dxcc.pdf}
+    \vfill
+    }}}
+%\renewcommand{\baselinestretch}{1.5} 
+%\usepackage[onehalfspacing]{setspace}
+\setlength\parindent{0pt}
+\begin{document}
+\AddToShipoutPicture*{\BackgroundPic}
+
+\vspace*{405px}
+
+{\fontsize{24}{24}\selectfont
+\hspace{395px} CWONR
+}
+
+\vspace*{40px}
+
+\center
+{\fontsize{64}{64}\selectfont%
+\textbf{%
+    \hspace{55px}CALL
+}
+}
+\vspace*{114px}
+
+{\fontsize{14}{14}\selectfont
+\hspace{40px} SCORE
+}
+
+\vspace*{25px}
+
+{\fontsize{14}{14}\selectfont
+\hspace{-278px} DATE
+}    
+\end{document}

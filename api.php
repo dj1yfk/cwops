@@ -117,6 +117,9 @@
     case 'update_account':
         update_account();
         break;
+    case 'award_pdf_old':
+        award_pdf_old();
+        break;
     case 'award_pdf':
         award_pdf();
         break;
@@ -480,6 +483,27 @@
     }
 
 
+    function award_pdf_old () {
+        $type = validate_get('type');
+        $callsign = $_SESSION['callsign'];
+
+        if ($type && $callsign) {
+
+            # query score...
+            global $db;
+            $q = mysqli_query($db, "select $type from cwops_scores where uid=".$_SESSION['id']);
+            if ($r = mysqli_fetch_row($q)) {
+                $score = $r[0];
+            }
+            header("Content-type: application/pdf");
+            header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
+            echo create_award_old ($callsign, $_SESSION['id'], $type, $score, date("d-M-Y"));
+        }
+        else {
+            echo "wrong type or callsign";
+        }
+    }
+
     function award_pdf () {
         $type = validate_get('type');
         $callsign = $_SESSION['callsign'];
@@ -492,17 +516,16 @@
             if ($r = mysqli_fetch_row($q)) {
                 $score = $r[0];
             }
-
-
             header("Content-type: application/pdf");
             header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
             echo create_award ($callsign, $_SESSION['id'], $type, $score, date("d-M-Y"));
-             
         }
         else {
             echo "wrong type or callsign";
         }
     }
+
+
 
     function member_list () {
         global $db;

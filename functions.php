@@ -1550,10 +1550,10 @@ function get_joindate($callsign) {
 
 }
 
-function create_award ($callsign, $uid, $type, $score, $date) {
+function create_award_old ($callsign, $uid, $type, $score, $date) {
     global $db;
 
-    error_log("create_award: $callsign, $uid, $type, $score, $date");
+    error_log("create_award_old: $callsign, $uid, $type, $score, $date");
 
     # validated in api.php
     if ($type == "") {
@@ -1582,6 +1582,45 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     system("pdftk pdf/cwops-$type.pdf fill_form $filename.fdf output $filename.pdf");
     return file_get_contents("$filename.pdf");
 }
+
+
+function create_award ($callsign, $uid, $type, $score, $date) {
+    global $db;
+
+    error_log("create_award: $callsign, $uid, $type, $score, $date");
+
+    # validated in api.php
+    if ($type == "") {
+        echo "Invalid type.";
+    }
+
+    $type = strtolower($type);
+
+    # get CWops number
+    $q = mysqli_query($db, "select nr from cwops_members where `callsign`='$callsign'");
+    $nr = 0;
+    if ($r = mysqli_fetch_row($q)) {
+        $nr = $r[0];
+    }
+
+    $tex = file_get_contents("pdf/template-$type.tex");
+
+    $tex = preg_replace("/CWONR/", $nr, $tex);
+    $tex = preg_replace("/CALL/", $callsign, $tex);
+    $tex = preg_replace("/SCORE/", $score, $tex);
+    $tex = preg_replace("/YEAR/", date("Y"), $tex);
+    $tex = preg_replace("/DATE/", $date, $tex);
+
+    mkdir("/tmp/cwops-award");
+    system("cp /home/fabian/sites/cwops.telegraphy.de/pdf/cwops-award-".$type.".pdf /tmp/cwops-award/");
+    chdir("/tmp/cwops-award");
+    file_put_contents("/tmp/cwops-award/$callsign.tex", $tex);
+    system("pdflatex /tmp/cwops-award/$callsign.tex > /dev/null", $ret);
+    return file_get_contents("/tmp/cwops-award/$callsign.pdf");
+}
+
+
+
 
 function is_call ($c) {
     $ret = false;
