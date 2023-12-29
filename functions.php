@@ -5,6 +5,11 @@ include_once("dxccs.php");
 include_once("wae.php");
 $call_exceptions = unserialize(file_get_contents("db/calls.phpserial"));
 
+# this is the year for which we generate the score tables. we keep this
+# variable in the old year a few days into january of the next year so everyone
+# can submit their final logs etc.
+$site_year = 2023;
+
 $arr_states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
 
 function stats($c) {
@@ -19,18 +24,19 @@ function stats($c) {
 function stats_manual($c) {
     global $db;
 
-    $q = mysqli_query($db, "select aca, cma, was, dxcc, wae, waz from cwops_scores where uid=".$_SESSION['id']);
+    $q = mysqli_query($db, "select aca, acma, cma, was, dxcc, wae, waz from cwops_scores where uid=".$_SESSION['id']);
     $r = mysqli_fetch_row($q);
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
 <table>
 <tr><th>Award</th><th>Score</th><th>PDF</th></tr>
 <tr><td>ACA</td> <td><input size="3" value="<?=$r[0];?>" id="acamanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
-<tr><td>CMA</td> <td><input size="3" value="<?=$r[1];?>"id="cmamanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
-<tr><td>WAS</td> <td><input size="3" value="<?=$r[2];?>" id="wasmanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
-<tr><td>DXCC</td><td><input size="3" value="<?=$r[3];?>" id="dxccmanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
-<tr><td>WAE</td> <td><input size="3" value="<?=$r[4];?>" id="waemanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
-<tr><td>WAZ</td> <td><input size="3" value="<?=$r[5];?>" id="wazmanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
+<tr><td>ACMA</td> <td><input size="3" value="<?=$r[1];?>" id="acmamanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=acma">Download PDF award</a></td></tr>
+<tr><td>CMA</td> <td><input size="3" value="<?=$r[2];?>"id="cmamanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
+<tr><td>WAS</td> <td><input size="3" value="<?=$r[3];?>" id="wasmanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
+<tr><td>DXCC</td><td><input size="3" value="<?=$r[4];?>" id="dxccmanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
+<tr><td>WAE</td> <td><input size="3" value="<?=$r[5];?>" id="waemanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
+<tr><td>WAZ</td> <td><input size="3" value="<?=$r[6];?>" id="wazmanual" onchange="update_manual(this.id);"></td> <td><a href="/api.php?action=award_pdf&type=waz">Download PDF award</a></td></tr>
 </table>
 <?
 }
@@ -41,9 +47,13 @@ function stats_default($c) {
 
     # ACA
 
-    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2023 and nr > 0");
+    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=$site_year and nr > 0");
     $r = mysqli_fetch_row($q);
     $aca = $r[0];
+
+    $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c' and year=$site_year and nr > 0");
+    $r = mysqli_fetch_row($q);
+    $acma = $r[0];
 
     $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c' and nr > 0");
     $r = mysqli_fetch_row($q);
@@ -78,11 +88,11 @@ function stats_default($c) {
     $waz = $r[0];
 
     # QTX current year
-    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 20 and `mycall`='$c' and year=2023");
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 20 and `mycall`='$c' and year=$site_year");
     $r = mysqli_fetch_row($q);
     $qtx = $r[0];
 
-    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 10 and qsolength < 20 and `mycall`='$c' and year=2023");
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where qsolength >= 10 and qsolength < 20 and `mycall`='$c' and year=$site_year");
     $r = mysqli_fetch_row($q);
     $mqtx = $r[0];
 
@@ -108,6 +118,7 @@ function stats_default($c) {
     $cmmqtx = $r[0];
 
     $cma_d = $cma;
+    $acma_d = $acma;
     $aca_d = $aca;
     $was_d = $was;
     $dxcc_d = $dxcc;
@@ -122,6 +133,8 @@ function stats_default($c) {
         if ($r['cma']) {
             if ($cma - $r['cma'])
                 $cma_d = $cma." <span style='color:green'>+".($cma-$r['cma'])."</span>";
+            if ($acma - $r['acma'])
+                $acma_d = $acma." <span style='color:green'>+".($acma-$r['acma'])."</span>";
             if ($aca - $r['aca'])
                 $aca_d = $aca." <span style='color:green'>+".($aca-$r['aca'])."</span>";
             if ($was - $r['was'])
@@ -140,7 +153,7 @@ function stats_default($c) {
     }
 
     $q = mysqli_query($db, "delete from cwops_scores where `uid` = ".$_SESSION['id']);
-    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `cma`, `was`, `dxcc`, `wae`, `waz`, `qtx`, `mqtx`, `ltqtx`, `ltmqtx`, `cmqtx`, `cmmqtx`,`updated`) VALUES (".$_SESSION['id'].", $aca, $cma, $was, $dxcc, $wae, $waz, $qtx, $mqtx, $ltqtx, $ltmqtx, $cmqtx, $cmmqtx, NOW());");
+    $q = mysqli_query($db, "insert into cwops_scores (`uid`, `aca`, `acma`, `cma`, `was`, `dxcc`, `wae`, `waz`, `qtx`, `mqtx`, `ltqtx`, `ltmqtx`, `cmqtx`, `cmmqtx`,`updated`) VALUES (".$_SESSION['id'].", $aca, $acma, $cma, $was, $dxcc, $wae, $waz, $qtx, $mqtx, $ltqtx, $ltmqtx, $cmqtx, $cmmqtx, NOW());");
     if (!$q) {
         error_log("score update failed".mysqli_error($db));
     }
@@ -153,6 +166,7 @@ function stats_default($c) {
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
 <tr><td>ACA</td> <td><?=$aca_d?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
 <tr><td>CMA</td> <td><?=$cma_d?></td> <td><?=award_details('cma', 'x');?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
+<tr><td>ACMA</td> <td><?=$acma_d?></td> <td><?=award_details('acma', 'y');?></td><td><a href="/api.php?action=award_pdf&type=acma">Download PDF award</a></td></tr>
 <tr><td>WAS</td> <td><?=$was_d?></td> <td><?=award_details('was', 'b');?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
 <tr><td>DXCC</td><td><?=$dxcc_d?></td><td><?=award_details('dxcc', 'b');?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
 <tr><td>WAE</td><td><?=$wae_d?></td><td><?=award_details('wae', 'b');?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
@@ -253,6 +267,24 @@ function aca($c, $y) {
     $ret = "<h2>ACA details for $c ($y): $cnt</h2>".$ret;
     return $ret;
 }
+
+function acma($c, $y) {
+    global $db;
+    $ret = "<h2>ACMA details for $c</h2>";
+    $q = mysqli_query($db, "SELECT nr, hiscall, date, band from cwops_log where `mycall`='$c' and year=$y and nr > 0 group by nr, band");
+    if(!$q) {
+        echo mysqli_error($db);
+    }
+    $cnt = 1;
+    $ret .= "<table><tr><th>Count</th><th>CWops</th><th>Call</th><th>Date</th><th>Band (m)</th></tr>\n";
+    while ($r = mysqli_fetch_row($q)) {
+        $ret .= "<tr><td>".$cnt++."</td><td>".$r[0]."</td><td>".$r[1]."</td><td>".$r[2]."</td><td>".$r[3]."</td></tr>\n";
+    }
+    $ret .= "</table>";
+    return $ret;
+}
+
+
 
 function cma($c) {
     global $db;
@@ -444,9 +476,9 @@ function qtx($c) {
     $ret = "<div class='qtxcontainer'>";
     foreach (array("QTX", "mQTX") as $t) {
         if ($t == "mQTX") 
-            $q = mysqli_query($db, "SELECT nr, hiscall, date, band, qsolength from cwops_log where `mycall`='$c' and year=2023 and qsolength >= 10 and qsolength < 20");
+            $q = mysqli_query($db, "SELECT nr, hiscall, date, band, qsolength from cwops_log where `mycall`='$c' and year=$site_year and qsolength >= 10 and qsolength < 20");
         else
-            $q = mysqli_query($db, "SELECT nr, hiscall, date, band, qsolength from cwops_log where `mycall`='$c' and year=2023 and qsolength >= 20");
+            $q = mysqli_query($db, "SELECT nr, hiscall, date, band, qsolength from cwops_log where `mycall`='$c' and year=$site_year and qsolength >= 20");
 
         if(!$q) {
             echo mysqli_error($db);
@@ -991,6 +1023,9 @@ function filter_qsos ($qsos, $callsign) {
             if (new_aca($q, $callsign)) {
                 array_push($reason, "ACA");
             }
+            if (new_acma($q, $callsign)) {
+                array_push($reason, "ACMA");
+            }
             if (new_cma($q, $callsign)) {
                 array_push($reason, "CMA");
             } 
@@ -1050,6 +1085,17 @@ function new_aca($qso, $c) {
     return ($r[0] == 0); 
 }
 
+# CMA: new annual cma band point?
+function new_acma($qso, $c) {
+    global $db;
+    $qsoyear = substr($qso['date'], 0, 4);
+    if ($qsoyear < 2024) {
+        return 0;
+    }
+    $q = mysqli_query($db, "SELECT count(*) from cwops_log where mycall='$c' and nr=".$qso['nr']." and band=".$qso['band']." and year=$qsoyear");
+    $r = mysqli_fetch_row($q);
+    return ($r[0] == 0); 
+}
 
 # CMA: new all-time band point?
 function new_cma($qso, $c) {
@@ -1276,7 +1322,7 @@ function validate ($type, $value) {
         break;
     case 'type':
         $value = strtoupper($value);
-        if (in_array($value, array("ACA", "CMA", "WAZ", "WAS", "WAE", "DXCC"))) {
+        if (in_array($value, array("ACA", "ACMA", "CMA", "WAZ", "WAS", "WAE", "DXCC"))) {
             return $value;
         }
         else {
@@ -1332,12 +1378,12 @@ function score_table() {
 
     echo "<div class='container'>";
     # aca / cma combined table
-    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc, cma desc;");
-    echo "<table><tr><th>Rank</th><th>Call</th><th>ACA</th><th>CMA</th></tr>\n";
+    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.acma as acma, cwops_scores.cma as cma from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by aca desc, acma desc, cma desc;");
+    echo "<table><tr><th>Rank</th><th>Call</th><th>ACA</th><th>ACMA</th><th>CMA</th></tr>\n";
     $cnt = 0;
     $lastscore = 0;
     while ($r = mysqli_fetch_row($q)) {
-        if ($r[0] != "TEST" and preg_match('/\d/', $r[0]) and $r[2] > 0) {
+        if ($r[0] != "TEST" and preg_match('/\d/', $r[0]) and $r[3] > 0) {
             if ($r[1] != $lastscore) {
                 $cnt++;
                 $lastscore = $r[1];
@@ -1346,7 +1392,7 @@ function score_table() {
             else {
                 $thiscnt = "";
             }
-            echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl('$r[0]');\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td></tr>\n";
+            echo "<tr><td>$thiscnt</td><td onmouseup=\"toggle_hl('$r[0]');\" onmouseout=\"hlcall('$r[0]', 0);\" onmouseover=\"hlcall('$r[0]', 1);\" name=\"$r[0]\">$r[0]</td><td class='score'>$r[1]</td><td class='score'>$r[2]</td><td class='score'>$r[3]</td></tr>\n";
         }
     }
     echo "</table>";
@@ -1414,12 +1460,12 @@ function score_table() {
 function score_table_by_call() {
     global $db;
 
-    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.cma as cma, cwops_scores.dxcc as dxcc, cwops_scores.was as was, cwops_scores.wae as wae, cwops_scores.waz as waz, cwops_scores.updated as upd from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by callsign;");
+    $q = mysqli_query($db, "select cwops_users.callsign as callsign, cwops_scores.aca as aca, cwops_scores.acma as acma, cwops_scores.cma as cma, cwops_scores.dxcc as dxcc, cwops_scores.was as was, cwops_scores.wae as wae, cwops_scores.waz as waz, cwops_scores.updated as upd from cwops_users inner join cwops_scores on cwops_users.id = cwops_scores.uid  order by callsign;");
     $out = array();
     while ($r = mysqli_fetch_row($q)) {
         if ($r[0] != "TEST" && $r[1] > 0) {
             $r[0] = "'".$r[0]."'";
-            $r[7] = "'".$r[7]."'";
+            $r[8] = "'".$r[8]."'";
             $out[] =  "[". join(',', $r)."]";
         }
     }
@@ -1456,7 +1502,7 @@ function score_table_by_call() {
 
             var tbl = document.createElement('table');
             var tr = tbl.insertRow();
-            tr.innerHTML = "<th>Rank</th><th onmouseup='update_table(0);'>Call</th><th onmouseup='update_table(1);'>ACA</th><th onmouseup='update_table(2);'>CMA</th><th onmouseup='update_table(3);'>DXCC</th><th onmouseup='update_table(4);'>WAS</th><th onmouseup='update_table(5);'>WAE</th><th onmouseup='update_table(6);'>WAZ</th><th onmouseup='update_table(7);'>Updated</th><th>Plot</th>";
+            tr.innerHTML = "<th>Rank</th><th onmouseup='update_table(0);'>Call</th><th onmouseup='update_table(1);'>ACA</th><th onmouseup='update_table(2);'>ACMA</th><th onmouseup='update_table(3);'>CMA</th><th onmouseup='update_table(4);'>DXCC</th><th onmouseup='update_table(5);'>WAS</th><th onmouseup='update_table(6);'>WAE</th><th onmouseup='update_table(7);'>WAZ</th><th onmouseup='update_table(8);'>Updated</th><th>Plot</th>";
             var cnt = 0;
             var lastscore = 0;
             for (var i = 0; i < scores_sort.length; i++) {
@@ -1490,7 +1536,7 @@ function score_table_by_call() {
                     tr = tbl.insertRow();
                     td = tr.insertCell();
                     td.appendChild(document.createTextNode(showrank));
-                    for (var j = 0; j < 8; j++) {
+                    for (var j = 0; j < 9; j++) {
                        td = tr.insertCell();
                        td.appendChild(document.createTextNode(scores_sort[i][j]));
                        if (j == f) {
@@ -1669,6 +1715,8 @@ function export_rbn ($c) {
         array_push($aca, $r[0]);
     }
 
+    # TODO: ACMA
+
     # CMA
     $cma = array();  # for each member number, an array of worked bands
     $q = mysqli_query($db, "SELECT nr, band from cwops_log where `mycall`='$c' group by nr, band;");
@@ -1692,18 +1740,13 @@ function export_rbn ($c) {
 
     # anything left over from the *last* member?
     if (count($arr)) {
-        error_log(print_r($lastnr,1));
-        error_log(print_r($arr,1));
         $cma[$lastnr] = $arr;
-        error_log(print_r($cma[3158],1));
     }
 
     # Assemble JSON object with all known member calls and assign the
     # information where they are needed
 
     $members = get_memberlist();
-
-    #$proto = array("all" => "", "160" => "", "80" => "", "60" => "", "40" => "", "30" => "", "20" => "", "17" => "", "15" => "", "12" => "", "10" => "", "6" => "");
 
     $bands = array("160", "80", "60", "40", "30", "20", "17", "15", "12", "10", "6");
 
@@ -1719,6 +1762,8 @@ function export_rbn ($c) {
         if (!in_array($m['nr'], $aca)) {
             $ret[$m['callsign']]['all'] = array("ACA");
         }
+
+        # TODO: ACMA
 
         # CMA
         foreach ($bands as $b) {

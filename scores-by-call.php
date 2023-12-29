@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-<title>CWops Award Scores (ACA, CMA, DXCC, WAS, WAE, WAZ)</title>
+<title>CWops Award Scores (ACA, ACMA, CMA, DXCC, WAS, WAE, WAZ)</title>
 <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <h2>Sortable and searchable table</h2>

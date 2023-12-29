@@ -41,6 +41,12 @@
     case 'cma':
         echo cma($_SESSION['callsign']);
         break;
+    case 'acma':
+        $year = $_GET['year'];
+        if ($year >= 2010 && $year <= date("Y")) {     
+            echo acma($_SESSION['callsign'], $year);
+        }
+        break;
     case 'was':
         $band = $_GET['band'];
         if (in_array($band, $bands)) {     
@@ -465,7 +471,7 @@
 
         $o = json_decode($postdata);
 
-        if (! (in_array($o->item, array("aca", "cma", "was", "dxcc", "wae", "waz")) and is_int(0+$o->value))) {
+        if (! (in_array($o->item, array("aca", "acma", "cma", "was", "dxcc", "wae", "waz")) and is_int(0+$o->value))) {
             echo "Invalid data.";
             return;
         }
