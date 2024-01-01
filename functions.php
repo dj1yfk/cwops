@@ -44,6 +44,7 @@ function stats_manual($c) {
 function stats_default($c) {
     global $db;
     global $wae_adif;
+    global $site_year;
 
     # ACA
 
@@ -54,6 +55,8 @@ function stats_default($c) {
     $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c' and year=$site_year and nr > 0");
     $r = mysqli_fetch_row($q);
     $acma = $r[0];
+	if ($site_year == 2023)
+			$acma = 0;
 
     $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$c' and nr > 0");
     $r = mysqli_fetch_row($q);
@@ -161,7 +164,7 @@ function stats_default($c) {
 
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
-<!-- p>Note: The year for which the scores are calculated will remain 2020 until January 5th, 2021, to give you sufficient time to upload your remaining 2020 logs. After that, it will switch to 2021 and the 2020 score table will be archived.</p -->
+<p>Note: The year for which the scores are calculated will remain 2023 until January 3rd, 2024, to give you sufficient time to upload your remaining 2023 logs. After that, it will switch to 2024 and the 2023 score table will be archived.</p -->
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
 <tr><td>ACA</td> <td><?=$aca_d?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
@@ -469,6 +472,7 @@ function wae($c, $b) {
 }
 
 function qtx($c) {
+    global $site_year;
     global $db;
 
     $s = array();
