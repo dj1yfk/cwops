@@ -1,0 +1,60 @@
+\documentclass[%
+    ,fontsize=22pt
+    ,paper=letter
+    ,pagesize
+    ,BCOR=8mm
+    ,headinclude=true
+    ,footinclude=false
+    ,mpinclude=false
+    ,DIV=calc
+    ]{scrreprt}
+\usepackage[margin=70pt]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{eurosym}
+%\usepackage{microtype}
+%\usepackage{ebgaramond}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+%\usepackage{bookman}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\definecolor{Bronze}{RGB}{128,128,0}
+\definecolor{Silver}{RGB}{128,128,128}
+\definecolor{Gold}{RGB}{212,175,55}
+\newcommand\BackgroundPic{
+    \put(-7,0){
+    \parbox[b][\paperheight]{\paperwidth}{%
+    \vfill
+    \centering
+    \includegraphics[width=\paperwidth,height=\paperheight]{template_latex.pdf}
+    \vfill
+    }}}
+%\renewcommand{\baselinestretch}{1.5} 
+%\usepackage[onehalfspacing]{setspace}
+\setlength\parindent{0pt}
+\begin{document}
+\AddToShipoutPicture*{\BackgroundPic}
+
+\vspace*{370px}
+
+\center
+{\fontsize{64}{64}\selectfont%
+\textbf{%
+    \hspace{55px}CALL
+}
+}
+\vspace*{136px}
+
+{\fontsize{28}{28}\selectfont
+\hspace{-120px} SCORE
+}
+
+%\vspace*{1px}
+
+{\fontsize{28}{28}\selectfont
+\hspace{180px} YEAR
+}    
+
+\end{document}
