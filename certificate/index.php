@@ -4,6 +4,7 @@
     foreach ($arr as $a) {
         $line = preg_split("/,/", $a);
         $calls[$line[0]] = $line[1];
+        $level[$line[0]] = $line[2];
     }
 ?>
 <!DOCTYPE html>
@@ -40,7 +41,7 @@
                 }
             }
             file_put_contents("/tmp/cwt-cert/lock", $cs);
-            $pdf = file_get_contents("https://cwops.telegraphy.de/certificate/generate.php?c=".$cs."&s=".$calls[$cs]);
+            $pdf = file_get_contents("https://cwops.telegraphy.de/certificate/generate.php?l=".$level[$cs]."&c=".$cs."&s=".$calls[$cs]);
             unlink("/tmp/cwt-cert/lock");
             file_put_contents("download/$cs.pdf", $pdf);
 ?>

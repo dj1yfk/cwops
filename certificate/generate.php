@@ -45,6 +45,13 @@ else {
     $tex = file_get_contents("template-entry.tex");
 }
 
+# override = non-members are only participants
+if (substr($_GET["l"],0,1) == "P") {
+    $type = 'entry-level';
+    $tex = file_get_contents("template-entry.tex");
+}
+
+
 
 $tex = preg_replace("/CALL/", $call, $tex);
 $tex = preg_replace("/SCORE/", $score, $tex);
