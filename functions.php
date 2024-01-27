@@ -8,7 +8,7 @@ $call_exceptions = unserialize(file_get_contents("db/calls.phpserial"));
 # this is the year for which we generate the score tables. we keep this
 # variable in the old year a few days into january of the next year so everyone
 # can submit their final logs etc.
-$site_year = 2023;
+$site_year = 2024;
 
 $arr_states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
 
@@ -963,6 +963,11 @@ function lookup ($call, $what, $date) {
     if ($call == "W8S") {
         $call = "KH8S";
     }
+    if ($call == "TX5S") {
+        $call = "FO0/F8UFT";
+    }
+
+
 
     # check if this callsign is in OK1RR's exception list
 
@@ -1495,7 +1500,7 @@ function score_table_by_call() {
                 // calls: ascending
                 scores_sort = scores_sort.sort((a, b) => a[f].localeCompare(b[f]));
             }
-            else if (f == 7) {
+            else if (f == 8) {
                 // date: descending
                 scores_sort = scores_sort.sort((a, b) => b[f].localeCompare(a[f]));
             }
@@ -1658,7 +1663,7 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     $tex = preg_replace("/CWONR/", $nr, $tex);
     $tex = preg_replace("/CALL/", $callsign, $tex);
     $tex = preg_replace("/SCORE/", $score, $tex);
-    $tex = preg_replace("/YEAR/", date("Y"), $tex);
+    $tex = preg_replace("/YEAR/", date("Y")-1, $tex);
     $tex = preg_replace("/DATE/", $date, $tex);
 
     mkdir("/tmp/cwops-award");
@@ -1691,7 +1696,7 @@ function is_call ($c) {
 function site_stats() {
     global $db;
     $ret = "";
-    $q = mysqli_query($db, "select * from cwops_members order by nr desc limit 1");
+    $q = mysqli_query($db, "select * from cwops_members where nr<3488 order by nr desc limit 1");
     $member = mysqli_fetch_object($q);
     $ret .= "Newest member in database: $member->callsign (#$member->nr, $member->joined) - ";
     $q = mysqli_query($db, "select count(*) as c from cwops_users");
