@@ -164,7 +164,7 @@ function stats_default($c) {
 
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
-<p>Note: The year for which the scores are calculated will remain 2023 until January 3rd, 2024, to give you sufficient time to upload your remaining 2023 logs. After that, it will switch to 2024 and the 2023 score table will be archived.</p -->
+<!-- p>Note: The year for which the scores are calculated will remain 2023 until January 3rd, 2024, to give you sufficient time to upload your remaining 2023 logs. After that, it will switch to 2024 and the 2023 score table will be archived.</p -->
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
 <tr><td>ACA</td> <td><?=$aca_d?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
@@ -1696,7 +1696,7 @@ function is_call ($c) {
 function site_stats() {
     global $db;
     $ret = "";
-    $q = mysqli_query($db, "select * from cwops_members where nr<3488 order by nr desc limit 1");
+    $q = mysqli_query($db, "select * from cwops_members order by nr desc limit 1");
     $member = mysqli_fetch_object($q);
     $ret .= "Newest member in database: $member->callsign (#$member->nr, $member->joined) - ";
     $q = mysqli_query($db, "select count(*) as c from cwops_users");
