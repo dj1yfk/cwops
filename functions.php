@@ -1696,7 +1696,7 @@ function is_call ($c) {
 function site_stats() {
     global $db;
     $ret = "";
-    $q = mysqli_query($db, "select * from cwops_members order by nr desc limit 1");
+    $q = mysqli_query($db, "select * from cwops_members order by joined desc, nr desc limit 1");
     $member = mysqli_fetch_object($q);
     $ret .= "Newest member in database: $member->callsign (#$member->nr, $member->joined) - ";
     $q = mysqli_query($db, "select count(*) as c from cwops_users");

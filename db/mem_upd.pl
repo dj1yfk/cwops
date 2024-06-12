@@ -17,7 +17,7 @@
 
 
 # find highest currently known CWops member from the database
-my $maxnr = `echo "select max(nr) from cwops_members" | mysql -ucwops -pcwops CWops | tail -1`;
+my $maxnr = `echo "select max(nr) from cwops_members where nr!=3588" | mysql -ucwops -pcwops CWops | tail -1`;
 
 my $if = `curl -s http://www.cwops.org/old/roster.html`;
 if (!($if =~ /src="(.*)"/)) {
@@ -45,7 +45,7 @@ foreach my $line (@arr) {
         if ($a[19] eq "--") {
             $a[19] = "";
         }
-        if ($a[11] > $maxnr) {
+        if ($a[11] > $maxnr and $a[9] ne "VE3INE") {
             $out .= "echo \"insert into cwops_members (\\`nr\\`, \\`callsign\\`, \\`was\\`, \\`joined\\`, \\`left\\`)  VALUES ($a[11], '$a[9]', '$a[19]', '$today', '2099-01-01');\" | mysql -ucwops -pcwops CWops \n";
         }
     }
