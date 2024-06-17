@@ -97,15 +97,15 @@ if (array_key_exists("id", $_SESSION)) {
     }
 
     function search () {
-        var hiscall = document.searchform.hiscall.value;
-        var nr = document.searchform.nr.value;
-        var band = document.searchform.band.value;
-        var ddate = document.searchform.band.value;
-        var dxcc = document.searchform.dxcc.value;
-        var waz = document.searchform.waz.value;
-        var was = document.searchform.was.value;
-        var wae = document.searchform.wae.value;
-        var qsolength = document.searchform.qsolength.value;
+        var hiscall = document.searchform.hiscall.value.trim();
+        var nr = document.searchform.nr.value.trim();
+        var band = document.searchform.band.value.trim();
+        var ddate = document.searchform.band.value.trim();
+        var dxcc = document.searchform.dxcc.value.trim();
+        var waz = document.searchform.waz.value.trim();
+        var was = document.searchform.was.value.trim();
+        var wae = document.searchform.wae.value.trim();
+        var qsolength = document.searchform.qsolength.value.trim();
 
         console.log("search " + hiscall+ " " + nr + " " + band + " " + dxcc + " " + waz + " " + was + " " + wae + " " + qsolength);
 
@@ -150,7 +150,7 @@ if (array_key_exists("id", $_SESSION)) {
 
         for (var i = 0; i < items.length; i++) {
             console.log(items[i] + id);
-            o[items[i]] = document.getElementById(items[i] + id).value;
+            o[items[i]] = document.getElementById(items[i] + id).value.trim();
         }
 
         o['id'] = id;
