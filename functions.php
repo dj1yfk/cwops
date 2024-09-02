@@ -966,6 +966,9 @@ function lookup ($call, $what, $date) {
     if ($call == "TX5S") {
         $call = "FO0/F8UFT";
     }
+    if ($call == "N5J") {
+        $call = "KH5J";
+    }
 
 
 
@@ -1663,7 +1666,7 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     $tex = preg_replace("/CWONR/", $nr, $tex);
     $tex = preg_replace("/CALL/", $callsign, $tex);
     $tex = preg_replace("/SCORE/", $score, $tex);
-    $tex = preg_replace("/YEAR/", date("Y")-1, $tex);
+    $tex = preg_replace("/YEAR/", date("Y"), $tex);
     $tex = preg_replace("/DATE/", $date, $tex);
 
     mkdir("/tmp/cwops-award");
