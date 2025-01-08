@@ -8,7 +8,7 @@ $call_exceptions = unserialize(file_get_contents("db/calls.phpserial"));
 # this is the year for which we generate the score tables. we keep this
 # variable in the old year a few days into january of the next year so everyone
 # can submit their final logs etc.
-$site_year = 2024;
+$site_year = 2025;
 
 $arr_states = array("AK"=>1, "HI"=>1, "CT"=>1, "ME"=>1, "MA"=>1, "NH"=>1, "RI"=>1, "VT"=>1, "NJ"=>1, "NY"=>1, "DE"=>1, "MD"=>1, "PA"=>1, "AL"=>1, "FL"=>1, "GA"=>1, "KY"=>1, "NC"=>1, "SC"=>1, "TN"=>1, "VA"=>1, "AR"=>1, "LA"=>1, "MS"=>1, "NM"=>1, "OK"=>1, "TX"=>1, "CA"=>1, "AZ"=>1, "ID"=>1, "MT"=>1, "NV"=>1, "OR"=>1, "UT"=>1, "WA"=>1, "WY"=>1, "MI"=>1, "OH"=>1, "WV"=>1, "IL"=>1, "IN"=>1, "WI"=>1, "CO"=>1, "IA"=>1, "KS"=>1, "MN"=>1, "MO"=>1, "NE"=>1, "ND"=>1, "SD"=>1);
 
@@ -164,12 +164,12 @@ function stats_default($c) {
 
 ?>
     <h2>Statistics for <?=$_SESSION['callsign'];?></h2>
-<!-- p>Note: The year for which the scores are calculated will remain 2023 until January 3rd, 2024, to give you sufficient time to upload your remaining 2023 logs. After that, it will switch to 2024 and the 2023 score table will be archived.</p -->
+<!-- p>Note: The year for which the scores are calculated will remain 2024 until January 3rd, 2025, to give you sufficient time to upload your remaining 2024 logs. After that, it will switch to 2025 and the 2024 score table will be archived.</p -->
 <table>
 <tr><th>Award</th><th>Score</th><th>Details</th><th>PDF</th></tr>
-<tr><td>ACA</td> <td><?=$aca_d?></td> <td><?=award_details('aca', 'y');?></td><td><a href="/api.php?action=award_pdf&type=aca">Download PDF award</a></td></tr>
+<tr><td>ACA</td> <td><?=$aca_d?></td> <td><?=award_details('aca', 'y');?></td><td><a id="pdfaca" href="/api.php?action=award_pdf&type=aca&year=<?=$site_year;?>">Download PDF award</a></td></tr>
 <tr><td>CMA</td> <td><?=$cma_d?></td> <td><?=award_details('cma', 'x');?></td><td><a href="/api.php?action=award_pdf&type=cma">Download PDF award</a></td></tr>
-<tr><td>ACMA</td> <td><?=$acma_d?></td> <td><?=award_details('acma', 'y');?></td><td><a href="/api.php?action=award_pdf&type=acma">Download PDF award</a></td></tr>
+<tr><td>ACMA</td> <td><?=$acma_d?></td> <td><?=award_details('acma', 'y');?></td><td><a id="pdfacma" href="/api.php?action=award_pdf&type=acma&year=<?=$site_year;?>">Download PDF award</a></td></tr>
 <tr><td>WAS</td> <td><?=$was_d?></td> <td><?=award_details('was', 'b');?></td><td><a href="/api.php?action=award_pdf&type=was">Download PDF award</a></td></tr>
 <tr><td>DXCC</td><td><?=$dxcc_d?></td><td><?=award_details('dxcc', 'b');?></td><td><a href="/api.php?action=award_pdf&type=dxcc">Download PDF award</a></td></tr>
 <tr><td>WAE</td><td><?=$wae_d?></td><td><?=award_details('wae', 'b');?></td><td><a href="/api.php?action=award_pdf&type=wae">Download PDF award</a></td></tr>
@@ -238,7 +238,7 @@ function award_details($t, $b) {
                <option>2</option></select>";
     }
     else if ($b == 'y') {
-        $ret .= "<select name=\"year\" id=\"year$t\" size=1>\n";
+        $ret .= "<select onChange=\"set_award_year('$t', this.value);\" name=\"year\" id=\"year$t\" size=1>\n";
         for ($i = date("Y"); $i >= 2010; $i--) {
             if ($i == date("Y")) {
                 $selected = "selected";
@@ -1642,10 +1642,15 @@ function create_award_old ($callsign, $uid, $type, $score, $date) {
 }
 
 
-function create_award ($callsign, $uid, $type, $score, $date) {
+function create_award ($callsign, $uid, $type, $year, $score, $date) {
     global $db;
+    global $site_year;
 
-    error_log("create_award: $callsign, $uid, $type, $score, $date");
+    if ($year == 0) {
+        $year = $site_year;
+    }
+
+    error_log("create_award: $callsign, $uid, $type, $year, $score, $date");
 
     # validated in api.php
     if ($type == "") {
@@ -1666,7 +1671,7 @@ function create_award ($callsign, $uid, $type, $score, $date) {
     $tex = preg_replace("/CWONR/", $nr, $tex);
     $tex = preg_replace("/CALL/", $callsign, $tex);
     $tex = preg_replace("/SCORE/", $score, $tex);
-    $tex = preg_replace("/YEAR/", date("Y"), $tex);
+    $tex = preg_replace("/YEAR/", $year, $tex);
     $tex = preg_replace("/DATE/", $date, $tex);
 
     mkdir("/tmp/cwops-award");

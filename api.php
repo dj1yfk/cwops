@@ -511,20 +511,39 @@
     }
 
     function award_pdf () {
+        global $site_year;
+        global $db;
+
         $type = validate_get('type');
+        $year = validate_get('year');
+
         $callsign = $_SESSION['callsign'];
 
         if ($type && $callsign) {
 
             # query score...
-            global $db;
-            $q = mysqli_query($db, "select $type from cwops_scores where uid=".$_SESSION['id']);
-            if ($r = mysqli_fetch_row($q)) {
-                $score = $r[0];
+            if ($year == 0 or $year == $site_year) {
+                $q = mysqli_query($db, "select $type from cwops_scores where uid=".$_SESSION['id']);
+                if ($r = mysqli_fetch_row($q)) {
+                    $score = $r[0];
+                }
+            }
+            else {  # calculate score, we cannot take it from the score table
+                error_log("not 2025... type = $type");
+                if ($type == "ACA") {
+                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$callsign' and year=$year and nr > 0");
+                    $r = mysqli_fetch_row($q);
+                    $score = $r[0];
+                }
+                if ($type == "ACMA") {
+                    $q = mysqli_query($db, "SELECT count(distinct `nr`, `band`) from cwops_log where `mycall`='$callsign' and year=$year and nr > 0");
+                    $r = mysqli_fetch_row($q);
+                    $score = $r[0];
+                }
             }
             header("Content-type: application/pdf");
             header("Content-Disposition: attachment; filename=\"$callsign-$type.pdf\"");
-            echo create_award ($callsign, $_SESSION['id'], $type, $score, date("d-M-Y"));
+            echo create_award ($callsign, $_SESSION['id'], $type, $year, $score, date("d-M-Y"));
         }
         else {
             echo "wrong type or callsign";
@@ -564,7 +583,7 @@
             if (!is_call($c))
                 continue;
 
-            $data = $redis->get("plotACA".$c);
+            $data = $redis->get("plotACA2025".$c);
 
             if ($data) {
                 $ret[$c] = unserialize($data);
@@ -572,16 +591,16 @@
             else {
                 $ret[$c] = Array();
 
-                $date = new DateTime("2024-01-01");
+                $date = new DateTime("2025-01-01");
                 for ($i = 1; $i <= 52; $i++) {
                     $date->modify('next tuesday');
                     $tue = $date->format('Y-m-d');
-                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2024 and date <= '$tue'");
+                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2025 and date <= '$tue'");
                     $r = mysqli_fetch_row($q);
                     $aca = $r[0];
                     array_push($ret[$c], $aca);
                 }
-                $redis->set('plotACA'.$c, serialize($ret[$c]), 60*60*24);
+                $redis->set('plotACA2025'.$c, serialize($ret[$c]), 60*60*24);
             }
         }
 

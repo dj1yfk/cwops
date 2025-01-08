@@ -350,6 +350,18 @@ if (array_key_exists("id", $_SESSION)) {
         request.send(JSON.stringify({"item": i, "value": value}));
 
     }
+
+    function set_award_year(t, y) {
+        var l = document.getElementById("pdf" + t);
+        var url = l.href;
+        console.log(url);
+        console.log(t);
+        console.log(y);
+        url = url.slice(0, -4); // remove year
+        url += y;
+        l.href = url;
+    }
+
     </script>
 
 <br>
