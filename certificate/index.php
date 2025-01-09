@@ -55,7 +55,7 @@
     }
     else {
 ?>
-<p>Please enter your callsign in the form and hit submit to generate and download the certificate for your participation in the 2023 CWTs.</p>
+<p>Please enter your callsign in the form and hit submit to generate and download the certificate for your participation in the 2024 CWTs.</p>
 
 <form action="/certificate/" method="GET">
 Callsign: <input type="text" size="12" name="callsign">

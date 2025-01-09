@@ -14,8 +14,8 @@ if (!is_int($score)) {
     exit;
 }
 
-$year    = 2023;
-$cont = lookup($call, 'continent', '2023-01-01');
+$year    = 2024;
+$cont = lookup($call, 'continent', '2024-01-01');
 
 if ($cont == "NA" or $cont == "EU") {
     $gold = 120;
