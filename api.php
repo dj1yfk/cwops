@@ -160,7 +160,7 @@
         # remove plot cache 
         $redis = new Redis();
         $redis->connect('127.0.0.1', 6379);
-        $redis->del("plotACA".$_SESSION['callsign']);
+        $redis->del("plotACA2025".$_SESSION['callsign']);
 
         echo $ret;
     }
