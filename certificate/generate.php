@@ -14,7 +14,13 @@ if (!is_int($score)) {
     exit;
 }
 
-$year    = 2024;
+$year = $_GET['y']+0;
+
+if (!is_int($year)) {
+    echo "Invalid year.";
+    exit;
+}
+
 $cont = lookup($call, 'continent', '2024-01-01');
 
 if ($cont == "NA" or $cont == "EU") {

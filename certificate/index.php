@@ -1,16 +1,9 @@
 <?
-    $arr = file("data.txt");
-
-    foreach ($arr as $a) {
-        $line = preg_split("/,/", $a);
-        $calls[$line[0]] = $line[1];
-        $level[$line[0]] = $line[2];
-    }
 ?>
 <!DOCTYPE html>
 <!--
 <?
-    print_r($calls);
+#    print_r($calls);
 ?>
 -->
 <html>
@@ -26,6 +19,15 @@
                 <h1>CWops CWT Certificate Download</h1>
 <?
     $cs = strtoupper($_GET['callsign']);
+    $year = intval($_GET['year']);
+
+    $arr = file("data$year.txt");
+    foreach ($arr as $a) {
+        $line = preg_split("/,/", $a);
+        $calls[$line[0]] = $line[1];
+        $level[$line[0]] = $line[2];
+    }
+
     if ($calls[$cs]) {
             $cs = strtoupper($_GET['callsign']);
             $lock_count = 0;
@@ -41,11 +43,11 @@
                 }
             }
             file_put_contents("/tmp/cwt-cert/lock", $cs);
-            $pdf = file_get_contents("https://cwops.telegraphy.de/certificate/generate.php?l=".$level[$cs]."&c=".$cs."&s=".$calls[$cs]);
+            $pdf = file_get_contents("https://cwops.telegraphy.de/certificate/generate.php?l=".$level[$cs]."&c=".$cs."&s=".$calls[$cs]."&y=".$year);
             unlink("/tmp/cwt-cert/lock");
             file_put_contents("download/$cs.pdf", $pdf);
 ?>
-    <p>Hello <?=$cs;?>, your certificate is ready to download. <a href="download/<?=$cs?>.pdf">Click this link to retrieve it</a>, or right-click and select "Save Link As..." to save it to your computer.</p>
+    <p>Hello <?=$cs;?>, your certificate for <?=$year;?> is ready to download. <a href="download/<?=$cs?>.pdf">Click this link to retrieve it</a>, or right-click and select "Save Link As..." to save it to your computer.</p>
 <?
     }
     else if ($cs) {
@@ -55,10 +57,17 @@
     }
     else {
 ?>
-<p>Please enter your callsign in the form and hit submit to generate and download the certificate for your participation in the 2024 CWTs.</p>
+<p>Please enter your callsign in the form and hit submit to generate and download the certificate for your participation in the CWTs.</p>
 
 <form action="/certificate/" method="GET">
-Callsign: <input type="text" size="12" name="callsign">
+Year: 
+<select id="year" name="year" size="1">
+<option>2021</option>
+<option>2022</option>
+<option>2023</option>
+<option selected>2024</option>
+</select>
+- Callsign: <input type="text" size="12" name="callsign">
 <input type="submit" value="Go">
 </form>
 
