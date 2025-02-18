@@ -745,15 +745,8 @@ function parse_adif($adif, $members, $ign, $startdate, $opfilter) {
             # check if operator is specified and if so, 
             # only allow if the operator is the account owner
             if ($opfilter == 1 and preg_match('/<OPERATOR:\d+(:\w)?()>([A-Z0-9\/]+)/', $q, $match)) {
-                if ($mhx[$match[3]]) {
-                    $op_nr = $mhx[$match[3]][0]["nr"];
-                    $op_main = $mhy[$op_nr];
-                    if ($op_main != $_SESSION['callsign']) {
+                if ($match[3] != $_SESSION['callsign']) {
                         continue;
-                    }
-                }
-                else {
-                    continue;
                 }
             }
 
