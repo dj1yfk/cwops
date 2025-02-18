@@ -572,7 +572,14 @@ function import($filename, $adif, $callsign, $ign, $opfilter) {
     $ret .= "Parsed log file with ".count($qsos)." QSOs with CWops members (or QTX QSOs).<br>";
 
     $qsos = filter_qsos($qsos, $callsign);
-    $ret .= "Imported ".count($qsos)." QSOs which were new for award purposes.<br>";
+    # count QSOs which were imported
+    $cnt = 0;
+    foreach ($qsos as $q) {
+        if ($q['reasons']) {
+            $cnt++;
+        }
+    }
+    $ret .= "Imported $cnt QSOs which were new for award purposes.<br>";
 
     $nr = rand(0,10000);
 
@@ -581,7 +588,13 @@ function import($filename, $adif, $callsign, $ign, $opfilter) {
     $ret .= "<pre id='import_log$nr'>";
     $import_log = "";
     foreach ($qsos as $q) {
-        $import_log .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
+        if ($q['reasons']) {
+            $import_log .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." needed for: ".$q['reasons']."<br>";
+        }
+        else {
+            $import_log .= "QSO: ".$q['call']." ".$q['date']." ".$q['band']." not imported (not needed for awards)<br>";
+        }
+
     }
     $ret .= $import_log;
     $ret .= "</pre>";
@@ -1086,9 +1099,12 @@ function filter_qsos ($qsos, $callsign) {
         if (count($reason)) {
             # error_log(implode(", ", $reason));
             $q['reasons'] = implode(", ", $reason);
-            array_push($out, $q);
             insert_qso($q, $callsign);
         }
+        else {
+            $q['reasons'] = "";
+        }
+        array_push($out, $q);
     }
 
     return $out;
