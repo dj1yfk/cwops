@@ -99,7 +99,13 @@
         else {
             $ign = 0;
         }
-        upload($ign);
+        if ($_GET['opfilter'] == "1") {
+            $opfilter = 1;
+        }
+        else {
+            $opfilter = 0;
+        }
+        upload($ign, $opfilter);
         break;
     case 'wipe':
         wipe();
@@ -143,7 +149,7 @@
         break;
     }
 
-    function upload($ign) {
+    function upload($ign, $opfilter) {
         $ret = "";
         foreach ($_FILES["uploaded_files"]["error"] as $key => $error) {
             if ($error == UPLOAD_ERR_OK) {
@@ -153,7 +159,7 @@
                 error_log("Upload  $filename_original to  $filename_local");
                 if (move_uploaded_file($_FILES['uploaded_files']['tmp_name'][$key], $filename_local)) {
                     error_log("move ok. ign = $ign");
-                    $ret .= import($filename_original, file_get_contents($filename_local), $_SESSION['callsign'], $ign);
+                    $ret .= import($filename_original, file_get_contents($filename_local), $_SESSION['callsign'], $ign, $opfilter);
                 }
             }
         }

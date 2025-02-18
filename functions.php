@@ -534,8 +534,9 @@ function qtx($c) {
 # 3. Iterate through imported log and based on (1) decide which QSOs are saved in the database.
 
 # If ign is set, ignore DXCC, WAZ and State info from the uploaded log
+# If opfilter is set, only accept QSOs where the ADIF OPERATOR field specifies the account owner
 
-function import($filename, $adif, $callsign, $ign) {
+function import($filename, $adif, $callsign, $ign, $opfilter) {
     global $db;
 
     $ret = "<br>Starting import ($filename) for $callsign...<br>";
@@ -566,7 +567,8 @@ function import($filename, $adif, $callsign, $ign) {
         $adif = parse_cam_cbr($adif, $members, "CAM");
     }
 
-    $qsos = parse_adif($adif, $members, $ign, $startdate);
+    $qsos = parse_adif($adif, $members, $ign, $startdate, $opfilter);
+    $allqsos = $qsos;
     $ret .= "Parsed log file with ".count($qsos)." QSOs with CWops members (or QTX QSOs).<br>";
 
     $qsos = filter_qsos($qsos, $callsign);
@@ -700,7 +702,8 @@ function makeadi ($field, $value) {
 }
 
 # parse ADIF and return member QSOs (matched by date) 
-function parse_adif($adif, $members, $ign, $startdate) {
+function parse_adif($adif, $members, $ign, $startdate, $opfilter) {
+    error_log("parse_adif $ign $opfilter");
     global $arr_states;
     $out = array();
 
@@ -724,6 +727,21 @@ function parse_adif($adif, $members, $ign, $startdate) {
             # check if QSO is CW mode
             if (!preg_match('/<MODE:2(:\w)?()>CW/', $q)) {
                 continue;
+            }
+
+            # check if operator is specified and if so, 
+            # only allow if the operator is the account owner
+            if ($opfilter == 1 and preg_match('/<OPERATOR:\d+(:\w)?()>([A-Z0-9\/]+)/', $q, $match)) {
+                if ($mhx[$match[3]]) {
+                    $op_nr = $mhx[$match[3]][0]["nr"];
+                    $op_main = $mhy[$op_nr];
+                    if ($op_main != $_SESSION['callsign']) {
+                        continue;
+                    }
+                }
+                else {
+                    continue;
+                }
             }
 
             # strip call (portable stuff etc.)

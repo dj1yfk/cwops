@@ -28,7 +28,8 @@ if (array_key_exists("id", $_SESSION)) {
 ?>
     <P>Upload new ADIF, CAM or Cabrillo log:
     <input type="file" id="file" multiple /> <button id='upload' onClick='javascript:upload();'>Upload</button>
-    <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended)
+    <input id="cbignore" type="checkbox" name="cbignore" value="1" checked> Take DXCC, WAZ and WAS values from the database (not from ADIF; recommended) &nbsp;
+    <input id="opfilter" type="checkbox" name="opfilter" value="1"> Filter QSOs by the "Operator" field (for Multi-OP logs)
     </p>
 
     <div id="upload_result"></div>
@@ -52,6 +53,7 @@ if (array_key_exists("id", $_SESSION)) {
     function upload () {
         document.getElementById('upload').disabled = true;
         document.getElementById('upload').innerHTML = "Upload in progress...";
+        var opfilter = document.getElementById('opfilter').checked;
         var ign = document.getElementById('cbignore').checked;
         var f = document.getElementById('file');
         var file = f.files[0];
@@ -62,7 +64,7 @@ if (array_key_exists("id", $_SESSION)) {
         }
 
         var request =  new XMLHttpRequest();
-        request.open("POST", '/api?action=upload&ign=' + (ign ? '1' : '0'), true);
+        request.open("POST", '/api?action=upload&ign=' + (ign ? '1' : '0') + '&opfilter=' + (opfilter ? '1' : '0'), true);
         request.onreadystatechange = function() {
             var done = 4, ok = 200;
             if (request.readyState == done && request.status == ok) {
