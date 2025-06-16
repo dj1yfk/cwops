@@ -562,7 +562,7 @@ function import($filename, $adif, $callsign, $ign, $opfilter) {
         $ret .= "Data format looks like Cabrillo. Trying to convert...<br>";
         $adif = parse_cam_cbr($adif, $members, "CBR");
     }
-    else if (!(strstr($adif, "<eoh>") or strstr($adif, "<EOH>"))) { # no end of ADIF header
+    else if (!(strstr($adif, "<call:") or strstr($adif, "<CALL:"))) { # no end of ADIF header
         $ret .= "Data format looks like CAM exported CSV (not ADIF). Trying to convert...<br>";
         $adif = parse_cam_cbr($adif, $members, "CAM");
     }
