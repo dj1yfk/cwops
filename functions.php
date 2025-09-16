@@ -562,7 +562,7 @@ function import($filename, $adif, $callsign, $ign, $opfilter) {
         $ret .= "Data format looks like Cabrillo. Trying to convert...<br>";
         $adif = parse_cam_cbr($adif, $members, "CBR");
     }
-    else if (!(strstr($adif, "<call:") or strstr($adif, "<CALL:"))) { # no end of ADIF header
+    else if (!(strstr($adif, "<call:") or strstr($adif, "<CALL:") or strstr($adif, "<eoh>") or strstr($adif, "<EOH>"))) { # no end of ADIF header
         $ret .= "Data format looks like CAM exported CSV (not ADIF). Trying to convert...<br>";
         $adif = parse_cam_cbr($adif, $members, "CAM");
     }
@@ -964,7 +964,6 @@ function f2b ($f) {
 }
 
 function member_lookup($call) {
-    global $associates;
     $members = get_memberlist($call);
 
     foreach ($members as $m) {
@@ -972,6 +971,7 @@ function member_lookup($call) {
             return json_encode($m);
         }
     }
+    error_log("$call not found ($cnt entries in db)");
 }
 
 # look up calls on HamQTH's API
