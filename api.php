@@ -150,6 +150,7 @@
     }
 
     function upload($ign, $opfilter) {
+        global $site_year;
         $ret = "";
         foreach ($_FILES["uploaded_files"]["error"] as $key => $error) {
             if ($error == UPLOAD_ERR_OK) {
@@ -166,7 +167,7 @@
         # remove plot cache 
         $redis = new Redis();
         $redis->connect('127.0.0.1', 6379);
-        $redis->del("plotACA2025".$_SESSION['callsign']);
+        $redis->del("plotACA$site_year".$_SESSION['callsign']);
 
         echo $ret;
     }
@@ -570,6 +571,7 @@
     # return JSON object to plot weekly data of the given calls for given award type (for now, only support ACA)
     function plot () {
         global $db;
+        global $site_year;
         $type = validate_get('type');
         $year = validate_get('year');
 
@@ -589,7 +591,7 @@
             if (!is_call($c))
                 continue;
 
-            $data = $redis->get("plotACA2025".$c);
+            $data = $redis->get("plotACA$site_year".$c);
 
             if ($data) {
                 $ret[$c] = unserialize($data);
@@ -597,16 +599,16 @@
             else {
                 $ret[$c] = Array();
 
-                $date = new DateTime("2025-01-01");
+                $date = new DateTime("$site_year-01-01");
                 for ($i = 1; $i <= 52; $i++) {
                     $date->modify('next tuesday');
                     $tue = $date->format('Y-m-d');
-                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=2025 and date <= '$tue'");
+                    $q = mysqli_query($db, "SELECT count(distinct(`nr`)) from cwops_log where `mycall`='$c' and year=$site_year and date <= '$tue'");
                     $r = mysqli_fetch_row($q);
                     $aca = $r[0];
                     array_push($ret[$c], $aca);
                 }
-                $redis->set('plotACA2025'.$c, serialize($ret[$c]), 60*60*24);
+                $redis->set("plotACA$site_year".$c, serialize($ret[$c]), 60*60*24);
             }
         }
 
