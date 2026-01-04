@@ -14,6 +14,7 @@ while (my $line = <>) {
     my @a = split(/,/, $line);
     my $nr = $a[0];
     my $callsign = $a[1];
+    $callsign =~ s/ //g;
     my $joined = $a[3];
     my $left = $a[4];
     my $state = ($a[5] eq "K" or $a[5] eq "KL7" or $a[5] eq "KL" or $a[5] eq "KH6") ? $a[6] : "";
