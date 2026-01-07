@@ -65,7 +65,8 @@ Year:
 <option>2021</option>
 <option>2022</option>
 <option>2023</option>
-<option selected>2024</option>
+<option>2024</option>
+<option selected>2025</option>
 </select>
 - Callsign: <input type="text" size="12" name="callsign">
 <input type="submit" value="Go">
