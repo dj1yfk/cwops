@@ -21,7 +21,8 @@ if (!is_int($year)) {
     exit;
 }
 
-$cont = lookup($call, 'continent', '2024-01-01');
+$cont = lookup($call, 'continent', '2025-01-01');
+
 
 if ($cont == "NA" or $cont == "EU") {
     $gold = 120;
@@ -29,7 +30,7 @@ if ($cont == "NA" or $cont == "EU") {
     $bron = 50;
 }
 else {
-    $gold = 90;
+    $gold = 60;
     $silv = 40;
     $bron = 24;
 }
