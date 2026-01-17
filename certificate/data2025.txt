@@ -880,6 +880,7 @@ OK2QA,97,Silver
 OK2ZV,1,Participant
 OK4MM,85,Participant
 OK5MM,74,Bronze
+OK5M,74,Bronze
 OK5WA,8,Participant
 OK7NV,1,Participant
 OM2ADM,4,Participant
