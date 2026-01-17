@@ -1050,42 +1050,50 @@ function lookup ($call, $what, $date) {
 # out:  An array of *new* QSOs (i.e. new ACA, CMA, WAS, WAE, DXCC or WAZ for
 #       this member)
 function filter_qsos ($qsos, $callsign) {
+    global $db;
 
     $out = array();
 
     foreach ($qsos as $q) {
         # error_log(print_r($q,1));
         $reason = array();
-        if ($q['nr']) {
-            if (new_aca($q, $callsign)) {
-                array_push($reason, "ACA");
-            }
-            if (new_acma($q, $callsign)) {
-                array_push($reason, "ACMA");
-            }
-            if (new_cma($q, $callsign)) {
-                array_push($reason, "CMA");
-            } 
-            if (new_was($q, $callsign)) {
-                array_push($reason, "WAS");
-            }
-            if (new_dxcc($q, $callsign)) {
-                array_push($reason, "DXCC");
-            }
-            if (new_wae($q, $callsign)) {
-                array_push($reason, "WAE");
-            }
-            if (new_waz($q, $callsign)) {
-                array_push($reason, "WAZ");
-            }
-        }
 
-        if (new_qtx($q, $callsign)) {
-            if ($q["qsolength"] >= 20) {
-            array_push($reason, "QTX");
+        $query = "SELECT count(*) from cwops_log where mycall='$c' and hiscall='".$q['call']."' and nr=".$q['nr']." and date='".$q['date']."' and band='".$q['band']."' and was='".$q['was']."' and qsolength=".$q['qsolength'];
+        $qr = mysqli_query($db, $query);
+        $r = mysqli_fetch_row($qr);
+        if ($r[0] == 0) {
+
+            if ($q['nr']) {
+                if (new_aca($q, $callsign)) {
+                    array_push($reason, "ACA");
+                }
+                if (new_acma($q, $callsign)) {
+                    array_push($reason, "ACMA");
+                }
+                if (new_cma($q, $callsign)) {
+                    array_push($reason, "CMA");
+                } 
+                if (new_was($q, $callsign)) {
+                    array_push($reason, "WAS");
+                }
+                if (new_dxcc($q, $callsign)) {
+                    array_push($reason, "DXCC");
+                }
+                if (new_wae($q, $callsign)) {
+                    array_push($reason, "WAE");
+                }
+                if (new_waz($q, $callsign)) {
+                    array_push($reason, "WAZ");
+                }
             }
-            else if ($q["qsolength"] >= 10) {
-                array_push($reason, "mQTX");
+
+            if (new_qtx($q, $callsign)) {
+                if ($q["qsolength"] >= 20) {
+                array_push($reason, "QTX");
+                }
+                else if ($q["qsolength"] >= 10) {
+                    array_push($reason, "mQTX");
+                }
             }
         }
 
