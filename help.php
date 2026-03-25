@@ -55,10 +55,7 @@
 <li>Doug, KR2Q (bug reports)</li>
 </ul>
 
-<h2>Future plans</h2>
-<ul>
-<li>RBN telnet server with filtering options for CWops members</li>
-</ul>
+<p>If you like to make a small contribution to cover the running costs of this site, please <a href="https://fkurz.net/ham/budget">check out my budget and donations</a> page.</p>
 
 <p><a href="/">Back to the main website</a></p>
 <hr>
