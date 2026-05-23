@@ -466,7 +466,7 @@ else {
     $hash = array_key_exists('cwops_hash', $_COOKIE) ? $_COOKIE['cwops_hash'] : '';
     if (is_int($id) and preg_match("/^[a-f0-9]{40}$/", $hash)) { 
         $redis = new Redis();
-        $redis->connect('127.0.0.1', 6379);
+        $redis->connect('redis.fkurz.net', 6379);
         $h = $redis->hget("cwops_sessions", $_COOKIE['cwops_id']);
         if ($h == $_COOKIE['cwops_hash']) { # correct cookie
             $q = mysqli_query($db, "SELECT * from cwops_users where id='$id'");

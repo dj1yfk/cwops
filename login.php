@@ -26,7 +26,7 @@ return;
 
 function logout () {
     $redis = new Redis();
-    $redis->connect('127.0.0.1', 6379);
+    $redis->connect('redis.fkurz.net', 6379);
     $redis->hset("cwops_sessions", $_SESSION['id'], "logout");
     setcookie("cwops_id", "", 1); 
     setcookie("cwops_hash", "", 1); 
@@ -146,7 +146,7 @@ function log_in_or_create ($call, $password, $recursive) {
             $_SESSION['email'] = $user->email;
             $_SESSION['manual'] = $user->manual;
             $redis = new Redis();
-            $redis->connect('127.0.0.1', 6379);
+            $redis->connect('redis.fkurz.net', 6379);
             $token = sha1(random_bytes(64));
             $redis->hset("cwops_sessions", $user->id, $token);
             setcookie("cwops_hash", $token, time() + (60 * 60 * 24 * 365)); 

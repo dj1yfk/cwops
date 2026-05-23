@@ -1020,7 +1020,7 @@ function lookup ($call, $what, $date) {
     }
 
     $redis = new Redis();
-    $redis->connect('127.0.0.1', 6379);
+    $redis->connect('redis.fkurz.net', 6379);
     $data = $redis->get("HamQTH".$call);
 
     if (!$data) {

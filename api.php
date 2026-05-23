@@ -166,7 +166,7 @@
         }
         # remove plot cache 
         $redis = new Redis();
-        $redis->connect('127.0.0.1', 6379);
+        $redis->connect('redis.fkurz.net', 6379);
         $redis->del("plotACA$site_year".$_SESSION['callsign']);
 
         echo $ret;
@@ -580,7 +580,7 @@
         }
 
         $redis = new Redis();
-        $redis->connect('127.0.0.1', 6379);
+        $redis->connect('redis.fkurz.net', 6379);
 
         $calls = explode(',', $_GET['calls']);
 
