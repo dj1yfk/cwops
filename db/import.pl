@@ -2,23 +2,29 @@
 
 use warnings;
 use strict;
+use Text::Iconv;
+my $converter = Text::Iconv->new("latin1", "ascii//TRANSLIT");
 
 # 7,,,K5MA,Jan,,,,,,,,,,,,,,,,,31-Dec-2009,13-Nov-2018,K,MA,SK
-
+print STDERR "remove 2nd entry for W4KLY\n";
 
 print "delete from cwops_members;\n";
 
 while (my $line = <>) {
     next unless ($line =~ /^\d/);
+    $line =~ s/ //g;
 
     my @a = split(/,/, $line);
     my $nr = $a[0];
     my $callsign = $a[1];
     $callsign =~ s/ //g;
+    my $name =  $a[2];
     my $joined = $a[3];
     my $left = $a[4];
     my $state = ($a[5] eq "K" or $a[5] eq "KL7" or $a[5] eq "KL" or $a[5] eq "KH6") ? $a[6] : "";
- 
+
+    $name = $converter->convert($name);
+
     $joined = &dateformat($joined);
     if ($left) {
         $left = &dateformat($left)
@@ -27,29 +33,31 @@ while (my $line = <>) {
         $left = "20990101";
     }
 
-    print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$callsign', '$joined', '$left', '$state');\n";
+    print "INSERT into cwops_members (`nr`, `callsign`, `name`, `joined`, `left`, `was`) VALUES ('$nr', '$callsign', '$name', '$joined', '$left', '$state');\n";
 
     # special calls for crown jubilee
     my $nc = 0;
-    if ($callsign =~ /^VA(.*)/) {
-        $nc = "VG$1";
-    }
-    elsif ($callsign =~ /^VE(.*)/) {
-        $nc = "VX$1";
-    }
-    elsif ($callsign =~ /^VO(.*)/) {
-        $nc = "XJ$1";
-    }
-    elsif ($callsign =~ /^VY(.*)/) {
-        $nc = "XK$1";
-    }
-    # Gx = GQ
-    elsif ($callsign =~ /^([2GM])[A-Z]?(.*)/) {
-        $nc = "$1R$2";
-    }
+    if (0) {
+        if ($callsign =~ /^VA(.*)/) {
+            $nc = "VG$1";
+        }
+        elsif ($callsign =~ /^VE(.*)/) {
+            $nc = "VX$1";
+        }
+        elsif ($callsign =~ /^VO(.*)/) {
+            $nc = "XJ$1";
+        }
+        elsif ($callsign =~ /^VY(.*)/) {
+            $nc = "XK$1";
+        }
+        # Gx = GQ
+        elsif ($callsign =~ /^([2GM])[A-Z]?(.*)/) {
+            $nc = "$1R$2";
+        }
 
-    if ($nc and $left eq "20990101") {
-        print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$nc', '20220514', '20990101', '$state');\n";
+        if ($nc and $left eq "20990101") {
+            print "INSERT into cwops_members (`nr`, `callsign`, `joined`, `left`, `was`) VALUES ('$nr', '$nc', '20220514', '20990101', '$state');\n";
+        }
     }
 
 
